@@ -20,7 +20,7 @@ export const projectsIndex: ProjectEntry[] = [
     excerpt:
       "Plataforma integral de monitoreo, control y análisis para optimizar eficiencia, reducir errores y mejorar trazabilidad en líneas de producción.",
     role: "Autor principal solo backend",
-    stack: ["Angular.js (frontend, no hecho por mí)", "Nest.js", "MySQL", "SCRUM", "KANBAN"],
+    stack: ["Angular.js", "Nest.js", "MySQL", "SCRUM", "KANBAN"],
     tags: ["backend", "manufacturing", "monitoring", "traceability"],
     links: [{ label: "Repositorio", note: "Repositorio privado / GitLab" }],
     privateRepo: true,
@@ -59,7 +59,8 @@ export const projectsIndex: ProjectEntry[] = [
       "Redis ioredis ^5",
       "@nestjs/throttler ^6.5",
       "Swagger ^11",
-      "React+Vite 18/5 frontend prueba",
+      "React 18",
+      "Vite 5",
       "Docker Compose",
     ],
     tags: ["auth", "security", "backend", "jwt", "otp"],
