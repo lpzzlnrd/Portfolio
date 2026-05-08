@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh api *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm install *)",
+      "Bash(npx next *)"
+    ]
+  }
+}
