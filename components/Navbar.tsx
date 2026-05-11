@@ -41,7 +41,7 @@ export function Navbar() {
 
       <div className="ml-auto flex items-center gap-3.5">
         <LangToggle />
-        <Link href="/about#contact" className="no-underline">
+        <Link href="/contact" className="no-underline">
           <Button kind="ghost">{t(STR.navContact)} →</Button>
         </Link>
       </div>

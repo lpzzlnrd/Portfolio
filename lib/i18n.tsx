@@ -107,4 +107,14 @@ export const STR = {
     es: "Sección en construcción. Pronto: música, juegos, libros, lo que sea que me distrae bien.",
     en: "Section under construction. Coming soon: music, games, books, whatever distracts me in a good way.",
   },
+
+  // /contact
+  contactH:      { es: "Contacto",    en: "Contact" },
+  contactForm:   { es: "Formulario",  en: "Form" },
+  contactDirect: { es: "Contacto directo", en: "Direct contact" },
+  contactEmail:  { es: "Email de trabajo", en: "Work email" },
+  contactPhone:  { es: "Teléfono / WhatsApp", en: "Phone / WhatsApp" },
+  contactSocial: { es: "Redes sociales", en: "Social media" },
+  contactAvail:  { es: "Disponibilidad", en: "Availability" },
+  contactFAQ:    { es: "Preguntas frecuentes", en: "FAQ" },
 } as const;
