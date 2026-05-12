@@ -19,7 +19,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   const title = t(project.title);
   const role = t(project.role);
-  const summary = t(project.summary);
   const description = t(project.description || project.summary);
   const status = project.private ? t(STR.privateRepo) : t(STR.publicRepo);
 
@@ -34,18 +33,18 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       <Navbar />
 
       {/* BREADCRUMB & BACK */}
-      <section className="px-14 pt-8 pb-4 border-b border-border">
+      <section className="px-6 md:px-14 pt-8 pb-4 border-b border-border">
         <Link href="/projects" className="font-mono text-[12px] text-text-mute pf-link">
           ← {t({ es: "Volver a proyectos", en: "Back to projects" })}
         </Link>
       </section>
 
       {/* HEADER */}
-      <section className="px-14 py-12 border-b border-border">
+      <section className="px-6 md:px-14 py-12 border-b border-border">
         <div className="max-w-[900px]">
-          <div className="flex items-center gap-2.5 mb-4">
+          <div className="flex flex-wrap items-center gap-2.5 mb-4">
             <span className="font-mono text-[11px] text-text-dim tracking-[0.06em] uppercase">
-              {t(project.role)}
+              {role}
             </span>
             <span className="font-mono text-[11px] text-text-dim">·</span>
             <span className="font-mono text-[11px] text-text-dim">{project.year}</span>
@@ -60,11 +59,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </span>
           </div>
 
-          <h1 className="m-0 text-[52px] font-medium leading-[1.1] tracking-[-0.015em] mb-6">
+          <h1 className="m-0 text-[32px] md:text-[52px] font-medium leading-[1.2] md:leading-[1.1] tracking-[-0.015em] mb-6">
             {title}
           </h1>
 
-          <p className="m-0 text-[17px] text-text-mute leading-[1.6] max-w-[720px]">
+          <p className="m-0 text-[16px] md:text-[17px] text-text-mute leading-[1.6] max-w-[720px]">
             {description}
           </p>
 
@@ -89,7 +88,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* STACK */}
-      <section className="px-14 py-10 border-b border-border">
+      <section className="px-6 md:px-14 py-10 border-b border-border">
         <div className="font-mono text-[12px] text-text-dim tracking-[0.12em] mb-5">
           {t({ es: "STACK TÉCNICO", en: "TECH STACK" })}
         </div>
@@ -102,8 +101,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
       {/* CHALLENGES & SOLUTIONS */}
       {(project.challenges || []).length > 0 && (
-        <section className="px-14 py-10 border-b border-border">
-          <div className="grid grid-cols-2 gap-10">
+        <section className="px-6 md:px-14 py-10 border-b border-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* Challenges */}
             <div>
               <div className="font-mono text-[12px] text-text-dim tracking-[0.12em] mb-6">
@@ -141,7 +140,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       {galleryImages.length > 0 && <Gallery images={galleryImages} />}
 
       {/* CTA SECTION */}
-      <section className="px-14 py-12 border-b border-border bg-surface/50">
+      <section className="px-6 md:px-14 py-12 border-b border-border bg-surface/50">
         <div className="max-w-[640px]">
           <p className="m-0 text-[15px] text-text-mute leading-[1.6] mb-6">
             {t({ es: "¿Te interesa este proyecto o tienes una idea similar?", en: "Interested in this project or have a similar idea?" })}
@@ -153,8 +152,8 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border px-14 py-7 flex justify-between items-center bg-surface">
-        <div className="font-mono text-[11px] text-text-dim">{t(STR.footerNote)}</div>
+      <footer className="border-t border-border px-6 md:px-14 py-7 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface">
+        <div className="font-mono text-[11px] text-text-dim text-center md:text-left">{t(STR.footerNote)}</div>
         <div className="flex gap-3.5">
           <a className="font-mono pf-link text-[12px]" href="https://github.com/lpzzlnrd">
             github
