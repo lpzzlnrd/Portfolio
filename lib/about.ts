@@ -57,6 +57,7 @@ export const ABOUT = {
     frameworks: ["NestJS", "Next.js", "React", "React Native", "Express.js", "Vue.js", "Django", "Laravel"],
     databases: ["PostgreSQL", "MySQL", "SQLite", "MongoDB", "Supabase", "Redis"],
     tools: ["Git", "GitLab", "GitHub", "Docker", "Swagger", "Tailwind"],
+    ai: ["Gemini", "Claude", "Kimi", "LLMs", "Prompt Engineering"],
   },
 
   // Experience
@@ -147,11 +148,10 @@ export const ABOUT = {
     { name: { es: "Inglés", en: "English" }, level: { es: "C1 (Tuniversia, Bogotá)", en: "C1 (Tuniversia, Bogotá)" } },
   ],
 
-  // Hobbies / personal — INTENTIONALLY EMPTY. leoco fills this in ES.
-  // After leoco fills the ES side, translate to EN to keep the toggle honest.
+  // Hobbies / personal
   hobbies: {
-    es: "", // ← LLENAR. ej.: música que escuchas, libros, juegos, deportes, qué haces fuera del código.
-    en: "",
+    es: "Nacido en Valencia, Venezuela, me considero un 'inquieto por naturaleza'. Mi curiosidad me impulsa a aprender constantemente, lo que me ha convertido en un apasionado de la cultura pop, los videojuegos, la historia y el cine (desde la ciencia ficción hasta los documentales).\n\nMi enfoque es analítico y crítico: cuando surge una idea, mi instinto es buscar sus puntos débiles para anticipar cualquier escenario. Creo que un entorno de trabajo eficiente se construye con profesionalismo, pero también con ese toque de sarcasmo, humor y amabilidad que hace que las cosas fluyan.\n\nFuera de la terminal, la música es mi motor —desde el Hip Hop y el Rock hasta bandas sonoras de juegos—. También soy un entusiasta de la mecánica automotriz, la F1 y el fútbol. Mis valores espirituales y morales son el norte que guía mis decisiones, tanto en la vida como en el código.",
+    en: "Born in Valencia, Venezuela, I describe myself as 'naturally restless.' My curiosity drives me to constantly learn, making me a fan of pop culture, video games, history, and cinema—from sci-fi to deep-dive documentaries.\n\nI have an analytical and critical mindset: whenever an idea takes shape, I instinctively look for its flaws to stay ahead of any scenario. I believe an efficient workspace is built on professionalism, seasoned with the right amount of sarcasm, humor, and kindness to keep the momentum going.\n\nOutside the terminal, music is my fuel—spanning everything from Hip Hop and Rock to video game soundtracks. I'm also a huge fan of automotive mechanics, F1, and soccer. My spiritual and moral values are the compass that guides my decisions, both in life and in code.",
   } as Bilingual,
 
   // Contact
@@ -163,4 +163,13 @@ export const ABOUT = {
     gitlab: "https://gitlab.com/lpzzlnrd",
     instagram: "https://instagram.com/lpzlnrd",
   },
+
+  // Images for the gallery
+  images: [
+    { title: "Leonardo Correa", alt: "Foto personal", src: "/images/about/me-1.jpg" },
+    { title: "Enfoque y Desarrollo", alt: "Foto personal trabajando", src: "/images/about/me-2.jpg" },
+    { title: "Personalidad e inquietud", alt: "Foto personal", src: "/images/about/me-3.jpg" },
+    { title: "Plataforma Herbaplant", alt: "Vista del dashboard de trazabilidad", src: "/images/projects/herbaplant/1.png" },
+    { title: "Control Industrial - MAHLE", alt: "Dashboard de monitoreo de producción", src: "/images/projects/mahle-dayton/1.png" },
+  ],
 } as const;

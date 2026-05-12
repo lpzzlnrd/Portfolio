@@ -5,11 +5,13 @@ import { Gallery } from "@/components/Gallery";
 import { Tag, Button } from "@/components/primitives";
 import { PROJECTS } from "@/lib/projects";
 import { useT, STR } from "@/lib/i18n";
+import { use } from "react";
 import { notFound } from "next/navigation";
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useT();
-  const project = PROJECTS.find((p) => p.id === params.id);
+  const resolvedParams = use(params);
+  const project = PROJECTS.find((p) => p.id === resolvedParams.id);
 
   if (!project) {
     notFound();
@@ -24,7 +26,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const galleryImages = (project.gallery || []).map((g, i) => ({
     title: g.title,
     alt: g.alt,
-    src: `/images/projects/${project.id}/${i + 1}.jpg`,
+    src: `/images/projects/${project.id}/${i + 1}.png`,
   }));
 
   return (

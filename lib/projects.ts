@@ -121,6 +121,12 @@ export const PROJECTS: Project[] = [
         description: { es: "React 19 con Server Components para formularios complejos. Tailwind para UX consistente. Validación end-to-end con Zod.", en: "React 19 with Server Components for complex forms. Tailwind for consistent UX. End-to-end validation with Zod." },
       },
     ],
+    gallery: [
+      { title: "Dashboard de Inventario", alt: "Vista principal de gestión de lotes" },
+      { title: "Control de Logística", alt: "Asignación de rutas y conductores" },
+      { title: "Operación en Campo", alt: "Interfaz optimizada para dispositivos móviles" },
+      { title: "Trazabilidad Comercial", alt: "Seguimiento de productos finalizados" },
+    ],
   },
   {
     id: "los-sauces",
@@ -163,6 +169,10 @@ export const PROJECTS: Project[] = [
         title: { es: "ETL resiliente", en: "Resilient ETL" },
         description: { es: "Job cron con reintentos exponenciales, alertas en fallos, y dead-letter queue para registros problemáticos. Implementado con Bull + Redis.", en: "Cron job with exponential retries, failure alerts, and dead-letter queue for problematic records. Implemented with Bull + Redis." },
       },
+    ],
+    gallery: [
+      { title: "Panel Administrativo", alt: "Gestión de admisiones y pacientes" },
+      { title: "Sincronización ETL", alt: "Vista de logs y estado del sistema legado" },
     ],
     github: "https://github.com/Botinfy/los-sauces",
   },
@@ -207,6 +217,10 @@ export const PROJECTS: Project[] = [
         title: { es: "Auditoría completa", en: "Full audit trail" },
         description: { es: "Cada acción (sensor reading, batch control) registrada en tabla de eventos con timestamp y usuario. Trazabilidad 100%.", en: "Every action (sensor reading, batch control) logged in event table with timestamp and user. 100% traceability." },
       },
+    ],
+    gallery: [
+      { title: "Monitoreo en Tiempo Real", alt: "Dashboard de telemetría industrial" },
+      { title: "Control de Batches", alt: "Interfaz de gestión de líneas de producción" },
     ],
   },
   {

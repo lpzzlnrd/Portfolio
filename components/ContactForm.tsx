@@ -25,7 +25,7 @@ export function ContactForm() {
     setState("loading");
 
     try {
-      const response = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+      const response = await fetch("https://formspree.io/f/leocorre2005@gmail.com", {
         method: "POST",
         body: JSON.stringify(formData),
         headers: {

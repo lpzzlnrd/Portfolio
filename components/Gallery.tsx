@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import clsx from "clsx";
-import { useT, STR } from "@/lib/i18n";
 
 type GalleryImage = {
   title: string;

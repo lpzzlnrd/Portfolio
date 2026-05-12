@@ -12,7 +12,6 @@ export function Navbar() {
   const items = [
     { k: "work",  label: t(STR.navWork),  href: "/projects" },
     { k: "about", label: t(STR.navAbout), href: "/about" },
-    { k: "setup", label: t(STR.navSetup), href: "/setup" },
   ];
 
   return (

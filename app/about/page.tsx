@@ -3,9 +3,15 @@ import { Navbar } from "@/components/Navbar";
 import { useT, STR } from "@/lib/i18n";
 import { ABOUT } from "@/lib/about";
 
+import { Gallery } from "@/components/Gallery";
+
 export default function AboutPage() {
   const t = useT();
   const hasHobbies = ABOUT.hobbies.es.trim().length > 0 || ABOUT.hobbies.en.trim().length > 0;
+
+  // Convert readonly images to mutable for the component if needed, 
+  // or just ensure Gallery accepts readonly.
+  const galleryImages = ABOUT.images.map(img => ({ ...img }));
 
   return (
     <main id="main" className="bg-bg min-h-screen">
@@ -51,6 +57,7 @@ export default function AboutPage() {
           <StackGroup label={t(STR.stackFrameworks)} items={ABOUT.stack.frameworks} />
           <StackGroup label={t(STR.stackDatabases)} items={ABOUT.stack.databases} />
           <StackGroup label={t(STR.stackTools)} items={ABOUT.stack.tools} />
+          <StackGroup label={t({ es: "IA & LLMs", en: "AI & LLMs" })} items={ABOUT.stack.ai} />
         </div>
       </Section>
 
@@ -138,6 +145,11 @@ export default function AboutPage() {
           </div>
         )}
       </Section>
+
+      {/* GALLERY */}
+      {galleryImages.length > 0 && (
+        <Gallery images={galleryImages} />
+      )}
 
       {/* CONTACT */}
       <Section id="contact" n="07" label={t(STR.secContact)}>
