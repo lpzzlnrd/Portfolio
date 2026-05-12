@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ContactForm } from "@/components/ContactForm";
 import { useT, STR } from "@/lib/i18n";
@@ -13,9 +12,9 @@ export default function ContactPage() {
       <Navbar />
 
       {/* HEADER */}
-      <section className="px-14 pt-12 pb-8 border-b border-border">
+      <section className="px-6 md:px-14 pt-12 pb-8 border-b border-border">
         <div className="font-mono text-[11px] text-text-dim tracking-[0.14em] mb-3.5">/contact</div>
-        <h1 className="m-0 text-[52px] font-medium tracking-[-0.015em] mb-4">
+        <h1 className="m-0 text-[36px] md:text-[52px] font-medium tracking-[-0.015em] mb-4">
           {t({ es: "Contacto", en: "Contact" })}<span className="text-accent">.</span>
         </h1>
         <p className="m-0 max-w-[640px] text-[15px] text-text-mute leading-[1.55]">
@@ -27,8 +26,8 @@ export default function ContactPage() {
       </section>
 
       {/* CONTENT */}
-      <section className="px-14 py-12 border-b border-border">
-        <div className="grid grid-cols-2 gap-16 max-w-[1000px]">
+      <section className="px-6 md:px-14 py-12 border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 max-w-[1000px]">
           {/* FORM */}
           <div>
             <div className="font-mono text-[12px] text-text-dim tracking-[0.12em] mb-6 uppercase">
@@ -51,7 +50,7 @@ export default function ContactPage() {
                 </div>
                 <a
                   href={`mailto:${ABOUT.contact.emailWork}`}
-                  className="text-accent hover:underline text-[15px] mt-1 inline-block"
+                  className="text-accent hover:underline text-[15px] mt-1 inline-block break-all"
                 >
                   {ABOUT.contact.emailWork}
                 </a>
@@ -69,7 +68,7 @@ export default function ContactPage() {
                   {t({ es: "Teléfono / WhatsApp", en: "Phone / WhatsApp" })}
                 </div>
                 <a
-                  href={`https://wa.me/${ABOUT.contact.phone.replace(/\\D/g, "")}`}
+                  href={`https://wa.me/${ABOUT.contact.phone.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-ok hover:underline text-[15px] mt-1 inline-block"
@@ -89,7 +88,7 @@ export default function ContactPage() {
                 <div className="font-mono text-text-dim text-[11px] uppercase tracking-[0.08em] mb-3">
                   {t({ es: "Redes sociales", en: "Social Media" })}
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <a
                     href={ABOUT.contact.github}
                     target="_blank"
@@ -135,8 +134,8 @@ export default function ContactPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border px-14 py-7 flex justify-between items-center bg-surface">
-        <div className="font-mono text-[11px] text-text-dim">{t(STR.footerNote)}</div>
+      <footer className="border-t border-border px-6 md:px-14 py-7 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface">
+        <div className="font-mono text-[11px] text-text-dim text-center md:text-left">{t(STR.footerNote)}</div>
         <div className="flex gap-3.5">
           <a className="font-mono pf-link text-[12px]" href="https://github.com/lpzzlnrd">
             github

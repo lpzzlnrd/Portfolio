@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import clsx from "clsx";
-
 type GalleryImage = {
   title: string;
   alt: string;
@@ -13,7 +11,7 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
 
   if (images.length === 0) {
     return (
-      <section className="px-14 py-8 border-y border-border bg-surface/50">
+      <section className="px-6 md:px-14 py-8 border-y border-border bg-surface/50">
         <div className="text-center py-12">
           <p className="text-text-mute">Sin imágenes disponibles por ahora.</p>
         </div>
@@ -24,11 +22,11 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
   return (
     <>
       {/* Gallery Grid */}
-      <section className="px-14 py-10 border-b border-border">
+      <section className="px-6 md:px-14 py-10 border-b border-border">
         <div className="font-mono text-[12px] text-text-dim tracking-[0.12em] mb-5">
           GALERÍA
         </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {images.map((img, idx) => (
             <button
               key={idx}

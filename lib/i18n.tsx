@@ -63,6 +63,11 @@ export const STR = {
     en: "A selection. Filter by domain, stack, or problem type.",
   },
   filter: { es: "Filtrar", en: "Filter" },
+  search: { es: "Buscar", en: "Search" },
+  searchProjects: {
+    es: "Título, stack o tipo de problema",
+    en: "Title, stack, or problem type",
+  },
   view:   { es: "Vista",   en: "View" },
   grid:   { es: "Grilla",  en: "Grid" },
   list:   { es: "Lista",   en: "List" },
