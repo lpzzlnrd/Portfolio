@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# design handoff (reference material — not for git)
+/design_handoff_portfolio
+
+# personal docs (CV, carta, contact info — not for git)
+/docs
