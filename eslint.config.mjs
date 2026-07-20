@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Design reference material, not part of the app build.
+    "design_handoff_portfolio/**",
+    // One-shot CommonJS bootstrap script, not part of the Next.js app.
+    "setup.js",
   ]),
 ]);
 
