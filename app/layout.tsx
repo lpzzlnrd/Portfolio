@@ -19,21 +19,21 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://portfolio-lpzzlnrd.vercel.app"),
   title: {
-    default: "leoco · backend / full-stack",
+    default: "leoco · backend / full-stack engineer",
     template: "%s · leoco",
   },
-  description: "Backends que no se rompen a las 3 AM.",
+  description: "Sistemas distribuidos y multi-tenant en Go, NestJS y Laravel. Backends que no se rompen a las 3 AM.",
   openGraph: {
-    title: "leoco · backend / full-stack",
-    description: "Backends que no se rompen a las 3 AM.",
+    title: "leoco · backend / full-stack engineer",
+    description: "Sistemas distribuidos y multi-tenant en Go, NestJS y Laravel. Backends que no se rompen a las 3 AM.",
     type: "website",
     url: "https://portfolio-lpzzlnrd.vercel.app",
     siteName: "leoco",
   },
   twitter: {
     card: "summary_large_image",
-    title: "leoco · backend / full-stack",
-    description: "Backends que no se rompen a las 3 AM.",
+    title: "leoco · backend / full-stack engineer",
+    description: "Sistemas distribuidos y multi-tenant en Go, NestJS y Laravel. Backends que no se rompen a las 3 AM.",
   },
 };
 

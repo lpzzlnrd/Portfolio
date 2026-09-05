@@ -9,7 +9,7 @@ import { useT, STR } from "@/lib/i18n";
 export default function HomePage() {
   const t = useT();
   const featured = PROJECTS.slice(0, 3);
-  const stack = ["TypeScript", "NestJS", "Next.js", "Postgres", "Redis", "Supabase", "Node", "Docker"];
+  const stack = ["Go", "TypeScript", "NestJS", "Laravel", "Next.js", "Vue", "Postgres", "Redis", "Docker"];
 
   return (
     <main id="main" className="bg-bg min-h-screen">
@@ -70,6 +70,30 @@ export default function HomePage() {
               {i > 0 && <span className="text-text-faint hidden md:inline">·</span>}
               {s}
             </span>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW I BUILD */}
+      <section className="px-6 md:px-14 pt-14 pb-4">
+        <div className="flex justify-between items-baseline mb-7 pb-3.5 border-b border-border">
+          <div className="font-mono text-[12px] tracking-[0.14em] text-text">
+            <span className="text-accent">{"// "}</span>
+            {t(STR.howIBuild)}
+          </div>
+          <Link href="/about" className="font-mono pf-link text-[12px]">{t(STR.navAbout)} →</Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { k: "reliability", n: "01", title: STR.pillarReliability, body: STR.pillarReliabilityBody },
+            { k: "security",    n: "02", title: STR.pillarSecurity,    body: STR.pillarSecurityBody },
+            { k: "contracts",   n: "03", title: STR.pillarContracts,   body: STR.pillarContractsBody },
+          ].map((p) => (
+            <div key={p.k} className="border border-border bg-surface p-5 flex flex-col gap-2.5">
+              <div className="font-mono text-[11px] text-accent tracking-[0.12em]">{p.n}</div>
+              <h3 className="m-0 text-[16px] font-medium leading-[1.3]">{t(p.title)}</h3>
+              <p className="m-0 text-[13px] text-text-mute leading-[1.6]">{t(p.body)}</p>
+            </div>
           ))}
         </div>
       </section>

@@ -27,6 +27,16 @@ export default function AboutPage() {
           {t(STR.aboutSub)}
         </p>
 
+        <a
+          href={ABOUT.cv.href}
+          download
+          className="mt-6 inline-flex items-center gap-2.5 px-4 py-2.5 font-mono text-[13px] font-medium tracking-wide border border-border-hi text-text no-underline hover:bg-surface transition-colors duration-[120ms]"
+        >
+          <span className="text-accent">↓</span>
+          {t(ABOUT.cv.label)}
+          <span className="text-text-dim text-[11px]">· {t(ABOUT.cv.updated)}</span>
+        </a>
+
         <div className="font-mono absolute top-6 right-8 text-[11px] text-text-faint text-right leading-[1.6] hidden md:block">
           <div>{ABOUT.name}</div>
           <div>{t(ABOUT.location)} · {ABOUT.timezone}</div>
@@ -56,13 +66,40 @@ export default function AboutPage() {
           <StackGroup label={t(STR.stackLanguages)} items={ABOUT.stack.languages} />
           <StackGroup label={t(STR.stackFrameworks)} items={ABOUT.stack.frameworks} />
           <StackGroup label={t(STR.stackDatabases)} items={ABOUT.stack.databases} />
+          <StackGroup label={t(STR.stackRealtime)} items={ABOUT.stack.realtime} />
+          <StackGroup label={t(STR.stackSecurity)} items={ABOUT.stack.security} />
+          <StackGroup label={t(STR.stackTesting)} items={ABOUT.stack.testing} />
           <StackGroup label={t(STR.stackTools)} items={ABOUT.stack.tools} />
-          <StackGroup label={t({ es: "IA & LLMs", en: "AI & LLMs" })} items={ABOUT.stack.ai} />
+          <StackGroup label={t({ es: "IA & APIs", en: "AI & APIs" })} items={ABOUT.stack.ai} />
+        </div>
+      </Section>
+
+      {/* COMPETENCIES */}
+      <Section n="03" label={t(STR.secCompetencies)}>
+        <p className="m-0 mb-6 max-w-[640px] text-[14px] text-text-mute leading-[1.55]">
+          {t(STR.competenciesSub)}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {ABOUT.competencies.map((c, i) => (
+            <div key={i} className="border border-border bg-surface p-4">
+              <div className="font-mono text-[10.5px] text-accent tracking-[0.12em] uppercase mb-3 pb-2 border-b border-border">
+                {t(c.group)}
+              </div>
+              <ul className="m-0 p-0 list-none flex flex-col gap-2">
+                {c.items.map((it, j) => (
+                  <li key={j} className="text-[13px] text-text-mute leading-[1.45] flex gap-2">
+                    <span className="text-text-faint shrink-0 font-mono text-[11px] mt-[2px]">▸</span>
+                    <span>{t(it)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </Section>
 
       {/* EXPERIENCE */}
-      <Section n="03" label={t(STR.secExperience)}>
+      <Section n="04" label={t(STR.secExperience)}>
         <div className="flex flex-col">
           {ABOUT.experience.map((job, i) => (
             <div
@@ -71,7 +108,9 @@ export default function AboutPage() {
             >
               <div className="font-mono text-[11px] text-text-dim tracking-[0.06em] leading-[1.6]">
                 <div className="text-text">{t(job.period)}</div>
-                <div className="mt-1">{job.company}</div>
+                <div className="mt-1">
+                  {typeof job.company === "string" ? job.company : t(job.company)}
+                </div>
               </div>
               <div>
                 <div className="text-[16px] font-medium">{t(job.role)}</div>
@@ -89,8 +128,41 @@ export default function AboutPage() {
         </div>
       </Section>
 
+      {/* COMPLEX ENGINEERING PROJECTS */}
+      <Section n="05" label={t(STR.secEngineering)}>
+        <p className="m-0 mb-6 max-w-[640px] text-[14px] text-text-mute leading-[1.55]">
+          {t(STR.engineeringSub)}
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ABOUT.engineering.map((p, i) => (
+            <div
+              key={i}
+              className="border border-border bg-surface p-4 flex flex-col gap-2.5 transition-colors duration-[120ms] hover:border-border-hi"
+            >
+              <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                <span className="font-mono text-[14px] text-text">{p.name}</span>
+                <span className="font-mono text-[10.5px] text-text-dim tracking-[0.06em] uppercase">
+                  {t(p.kind)}
+                </span>
+              </div>
+              <p className="m-0 text-[13px] text-text-mute leading-[1.55]">{t(p.detail)}</p>
+              <div className="flex flex-wrap gap-1 mt-auto pt-1.5">
+                {p.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-text-mute border border-border px-1.5 py-[2px]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* EDUCATION */}
-      <Section n="04" label={t(STR.secEducation)}>
+      <Section n="06" label={t(STR.secEducation)}>
         <div className="flex flex-col">
           {ABOUT.education.map((ed, i) => (
             <div
@@ -115,7 +187,7 @@ export default function AboutPage() {
       </Section>
 
       {/* LANGUAGES */}
-      <Section n="05" label={t(STR.secLanguages)}>
+      <Section n="07" label={t(STR.secLanguages)}>
         <div className="flex gap-x-10 gap-y-6 flex-wrap">
           {ABOUT.languages.map((lng, i) => (
             <div key={i} className="flex flex-col gap-1">
@@ -129,7 +201,7 @@ export default function AboutPage() {
       </Section>
 
       {/* HOBBIES — user-filled */}
-      <Section n="06" label={t(STR.secHobbies)}>
+      <Section n="08" label={t(STR.secHobbies)}>
         {hasHobbies ? (
           <p className="m-0 max-w-[720px] text-[16px] text-text leading-[1.6] whitespace-pre-line">
             {t(ABOUT.hobbies)}
@@ -152,7 +224,7 @@ export default function AboutPage() {
       )}
 
       {/* CONTACT */}
-      <Section id="contact" n="07" label={t(STR.secContact)}>
+      <Section id="contact" n="09" label={t(STR.secContact)}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3 max-w-[720px] font-mono text-[13px]">
           <ContactRow label="email" value={ABOUT.contact.emailPersonal} href={`mailto:${ABOUT.contact.emailPersonal}`} />
           <ContactRow label="work"  value={ABOUT.contact.emailWork}     href={`mailto:${ABOUT.contact.emailWork}`} />

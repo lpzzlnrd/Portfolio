@@ -36,6 +36,148 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
+    id: "botinfy-gateway",
+    title: {
+      es: "Botinfy Gateway",
+      en: "Botinfy Gateway",
+    },
+    role: {
+      es: "Backend (autor principal)",
+      en: "Backend (sole author)",
+    },
+    year: "2026",
+    tags: ["Go", "Meta Graph API", "HMAC", "Docker", "GitHub Actions"],
+    domain: "integrations",
+    private: true,
+    summary: {
+      es: "Gateway multi-tenant en Go que recibe los webhooks de una App de Meta en una sola URL y los rutea al CRM de cada cliente, con firma HMAC, deduplicación y cola de fallos persistente. Cero dependencias externas.",
+      en: "Multi-tenant Go gateway that receives every webhook of a single Meta App on one URL and routes each event to the right client CRM, with HMAC signing, deduplication and a persistent failure queue. Zero external dependencies.",
+    },
+    description: {
+      es: "Una App de Meta tiene una única URL de webhook. Si esa App tiene varios números de WhatsApp conectados —uno por cliente— Meta manda los eventos de todos al mismo endpoint, mezclados y sin forma de suscribir cada número a un destino distinto. El gateway se para en el medio: recibe todo, mira de qué número o cuenta viene cada evento y lo reenvía al CRM de ese cliente. En el camino de vuelta permite que cada CRM responda por su propio número, sin entregarle nunca el token global de la App. Escrito íntegramente con la librería estándar de Go: sin una sola dependencia externa.",
+      en: "A Meta App has a single webhook URL. If that App has several WhatsApp numbers connected —one per client— Meta sends every event to the same endpoint, mixed together and with no way to subscribe each number to a different destination. The gateway sits in the middle: it receives everything, looks at which number or account each event came from, and forwards it to that client's CRM. On the way back it lets each CRM reply from its own number, without ever handing over the App's global token. Written entirely with the Go standard library: not a single external dependency.",
+    },
+    challenges: [
+      {
+        title: { es: "Aislamiento entre clientes", en: "Cross-tenant isolation" },
+        description: { es: "Los identificadores de WhatsApp, Messenger e Instagram son espacios independientes en Meta: un id de página puede coincidir numéricamente con el phone_number_id de otro cliente sin tener relación. Con un mapa único, ese evento se entregaría al CRM equivocado. Solución: un mapa de identificadores por plataforma, y sesgo conservador — ante cualquier duda gana el destino por defecto, porque mandar al default es recuperable y mandar al CRM ajeno filtra datos.", en: "WhatsApp, Messenger and Instagram identifiers are independent spaces in Meta: a page id can numerically collide with another client's phone_number_id while being unrelated. With a single map, that event would be delivered to the wrong CRM. Solution: one identifier map per platform, plus a conservative bias — when in doubt the default destination wins, because routing to the default is recoverable while routing to another client's CRM leaks data." },
+      },
+      {
+        title: { es: "La firma se rompe al reserializar", en: "Re-serializing breaks the signature" },
+        description: { es: "La firma de Meta es un HMAC-SHA256 sobre los bytes exactos del body. Reserializar el JSON cambia el orden de las claves o los espacios, y la firma deja de validar en el destino. Solución: el payload se reenvía byte a byte, sin transformarlo, con la firma original intacta.", en: "Meta's signature is an HMAC-SHA256 over the exact bytes of the body. Re-serializing the JSON changes key order or whitespace, and the signature stops validating downstream. Solution: the payload is forwarded byte for byte, untransformed, with the original signature intact." },
+      },
+      {
+        title: { es: "Un 200 es una promesa", en: "A 200 is a promise" },
+        description: { es: "Meta no reintenta un evento que ya recibió 200: desde ese momento el evento existe únicamente dentro del gateway. Solución: todo camino termina en el destino o en la cola de fallos en disco, y el único caso en que se responde 500 es cuando no puede garantizarse ninguna de las dos cosas.", en: "Meta does not retry an event that already got a 200: from that moment the event exists only inside the gateway. Solution: every path ends either at the destination or in the on-disk failure queue, and the only case that returns a 500 is when neither can be guaranteed." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Reenvío asíncrono con cola de fallos", en: "Async forwarding with a failure queue" },
+        description: { es: "La respuesta a Meta no espera al destino: el reenvío corre en su propia goroutine con contexto de vida independiente. Si falla, el evento cae en una cola persistente en disco (.jsonl) que se drena sola cada intervalo y también a pedido. El apagado por SIGTERM drena en orden —servidor HTTP, reenvíos en vuelo, cola— para que un redeploy no pierda eventos.", en: "The response to Meta does not wait for the destination: forwarding runs in its own goroutine with an independent lifetime context. On failure the event lands in a persistent on-disk queue (.jsonl) that drains automatically on an interval and on demand. SIGTERM shutdown drains in order —HTTP server, in-flight forwards, queue— so a redeploy loses no events." },
+      },
+      {
+        title: { es: "Credenciales por cliente, no un token global", en: "Per-tenant credentials, not a global token" },
+        description: { es: "El token de la App permite emitir desde cualquier número conectado: dárselo a un cliente es darle la capacidad de suplantar a otro. Por eso el token no sale del gateway. Cada cliente recibe una API key propia, y esa key determina el número; el cuerpo del pedido no puede cambiarlo. Quien pide emitir desde un número ajeno recibe 403 y no se emite nada.", en: "The App token can send from any connected number: handing it to a client is handing them the ability to impersonate another. So the token never leaves the gateway. Each client gets its own API key, and that key resolves the number; the request body cannot override it. Anyone asking to send from a number that isn't theirs gets a 403 and nothing is sent." },
+      },
+      {
+        title: { es: "Splitting y re-firma de payloads mixtos", en: "Splitting and re-signing mixed payloads" },
+        description: { es: "Meta puede meter en un solo POST entradas de clientes distintos. Antes eso mandaba el payload completo al destino por defecto, que recibía conversaciones ajenas mientras los otros CRM no recibían nada. Ahora se parte: cada destino recibe un cuerpo con solo sus entradas y el X-Hub-Signature-256 se recalcula sobre ese cuerpo. Un contador en /stats registra cuántas veces ocurrió.", en: "Meta can batch entries from different clients into a single POST. That used to send the whole payload to the default destination, which received other clients' conversations while the other CRMs got nothing. Now it splits: each destination receives a body with only its own entries, and X-Hub-Signature-256 is recomputed over that body. A counter in /stats records how often this happened." },
+      },
+      {
+        title: { es: "Operación sin reinicios", en: "Operating without restarts" },
+        description: { es: "La tabla de clientes se recarga en caliente bajo un candado compartido con los cambios de la API de administración, así que dar de alta un cliente no requiere redesplegar. Se suma métricas en memoria con endpoint /stats, health check, middleware de request-ID y checks de despliegue en GitHub Actions.", en: "The client table hot-reloads under a lock shared with admin API changes, so onboarding a client requires no redeploy. On top of that: in-memory metrics with a /stats endpoint, health checks, request-ID middleware and deploy checks in GitHub Actions." },
+      },
+    ],
+  },
+  {
+    id: "reino-aromas",
+    title: {
+      es: "Reino Aromas · CRM omnicanal",
+      en: "Reino Aromas · Omnichannel CRM",
+    },
+    role: {
+      es: "Full-stack (autor principal)",
+      en: "Full-stack (sole author)",
+    },
+    year: "2026",
+    tags: ["Laravel", "Reverb", "Vue 3", "WebSockets", "MySQL"],
+    domain: "fullstack",
+    private: false,
+    summary: {
+      es: "CRM omnicanal que unifica WhatsApp, Messenger e Instagram en una bandeja única, con mensajería en vivo por WebSocket y un tablero Kanban de tickets que se mueve en tiempo real entre agentes.",
+      en: "Omnichannel CRM unifying WhatsApp, Messenger and Instagram into a single inbox, with live WebSocket messaging and a Kanban ticket board that moves in real time between agents.",
+    },
+    description: {
+      es: "CRM construido sobre Laravel 13 y Vue 3 que centraliza las conversaciones de los tres canales de Meta en una sola bandeja. La capa de tiempo real usa Laravel Reverb con broadcasting: los mensajes entrantes aparecen sin recargar y el tablero Kanban de tickets refleja en vivo los movimientos de cualquier agente. Incluye gestión del ciclo de vida de las cuentas de Meta, reintentos para mensajería fallida y backups automatizados de la base con verificación de integridad.",
+      en: "CRM built on Laravel 13 and Vue 3 that centralizes conversations from all three Meta channels into one inbox. The real-time layer uses Laravel Reverb with broadcasting: incoming messages appear without a reload and the Kanban ticket board reflects any agent's moves live. It includes Meta account lifecycle management, retries for failed messaging and automated database backups with integrity verification.",
+    },
+    challenges: [
+      {
+        title: { es: "El estado \"En vivo\" mentía", en: "The \"Live\" status was lying" },
+        description: { es: "El indicador miraba si Reverb estaba configurado en el build, no si el socket estaba realmente vivo. Con Reverb caído seguía diciendo \"al día\" y ocultaba el botón de actualizar, dejando al agente sin saber que no estaba recibiendo nada. Solución: escuchar el socket real y resincronizar al reconectar.", en: "The indicator checked whether Reverb was configured at build time, not whether the socket was actually alive. With Reverb down it still said \"up to date\" and hid the refresh button, leaving the agent unaware they were receiving nothing. Solution: listen to the real socket and resync on reconnect." },
+      },
+      {
+        title: { es: "Configuración en dos lugares", en: "Configuration in two places" },
+        description: { es: "Las credenciales de Meta vivían en .env, pero operación necesitaba cambiarlas sin tocar el servidor. Solución: modelo MetaAccount en base de datos con precedencia sobre .env, y un servicio que unifica ambas fuentes tras una sola interfaz.", en: "Meta credentials lived in .env, but operations needed to change them without touching the server. Solution: a MetaAccount database model taking precedence over .env, plus a service unifying both sources behind a single interface." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Kanban colaborativo en vivo", en: "Live collaborative Kanban" },
+        description: { es: "Tablero de tickets con drag & drop que persiste el movimiento y lo difunde por WebSocket, de modo que dos agentes viendo el mismo tablero ven el mismo estado sin recargar.", en: "Drag & drop ticket board that persists each move and broadcasts it over WebSocket, so two agents looking at the same board see the same state without reloading." },
+      },
+      {
+        title: { es: "Entrega con reintentos y respaldo", en: "Delivery with retries and backups" },
+        description: { es: "Mecanismo de reintentos para mensajes fallidos, expuesto por endpoints de API y por comando de consola. En paralelo, backups automatizados de MySQL con rotación, verificación de integridad y procedimiento de restauración documentado.", en: "Retry mechanism for failed messages, exposed through API endpoints and a console command. Alongside it, automated MySQL backups with rotation, integrity verification and a documented restore procedure." },
+      },
+    ],
+    github: "https://github.com/lpzzlnrd/Reino-Aromas",
+  },
+  {
+    id: "trinita",
+    title: {
+      es: "Trinita · E-commerce farmacéutico",
+      en: "Trinita · Pharmaceutical e-commerce",
+    },
+    role: {
+      es: "Frontend / full-stack",
+      en: "Frontend / full-stack",
+    },
+    year: "2026",
+    tags: ["Next.js 16", "React 19", "Supabase", "Playwright", "Zod"],
+    domain: "fullstack",
+    private: true,
+    summary: {
+      es: "Tienda en línea de productos farmacéuticos con catálogo, ficha de producto, retiro en tienda y delivery. Accesibilidad WCAG verificada por tests automatizados de contraste.",
+      en: "Online pharmacy storefront with catalog, product detail, in-store pickup and delivery. WCAG accessibility verified by automated contrast tests.",
+    },
+    description: {
+      es: "E-commerce construido sobre Next.js 16 y Supabase para una farmacia. Cubre el recorrido completo de compra: catálogo con precio por unidad, ficha de producto con tabla de atributos y migas de pan, agregado al carrito desde la grilla, mini-carrito animado con gestos táctiles y lógica de entrega con retiro en tienda o delivery. El trabajo incluyó cerrar los huecos de calidad que suelen quedar fuera del alcance: estados de carga, pantallas de error y 404, accesibilidad y comportamiento móvil.",
+      en: "E-commerce built on Next.js 16 and Supabase for a pharmacy. It covers the full purchase journey: catalog with unit pricing, product detail with attribute table and breadcrumbs, add-to-cart from the grid, an animated mini-cart with touch gestures, and delivery logic with in-store pickup or home delivery. The work included closing the quality gaps that usually fall outside scope: loading states, error and 404 screens, accessibility and mobile behavior.",
+    },
+    challenges: [
+      {
+        title: { es: "Contraste por debajo del mínimo", en: "Contrast below the minimum" },
+        description: { es: "El badge de recipe estaba a 2.79:1 y los enlaces a 4.42:1, ambos por debajo del mínimo WCAG. Solución: recalibrar la paleta a valores conformes y dejar tests automatizados que fallan si alguien vuelve a bajarlos.", en: "The prescription badge sat at 2.79:1 and links at 4.42:1, both below the WCAG minimum. Solution: recalibrate the palette to conformant values and leave automated tests that fail if anyone lowers them again." },
+      },
+      {
+        title: { es: "Consistencia lingüística a escala", en: "Linguistic consistency at scale" },
+        description: { es: "La interfaz mezclaba voseo y tuteo entre componentes, tests y mensajes de error. Solución: normalizar todo a tuteo (español de Venezuela) y añadir una validación por regex que detecta voseo en el código, convirtiendo un criterio editorial en un test que corre solo.", en: "The interface mixed voseo and tuteo across components, tests and error messages. Solution: normalize everything to tuteo (Venezuelan Spanish) and add a regex validation that detects voseo in the codebase, turning an editorial rule into a test that runs on its own." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Tests poco convencionales como red de seguridad", en: "Unconventional tests as a safety net" },
+        description: { es: "Además de E2E con Playwright y unitarios con Vitest, se añadieron tests de contraste de color, de iconografía del menú y de consistencia lingüística. Son criterios que normalmente se revisan a ojo y se degradan con el tiempo; como test, no.", en: "On top of Playwright E2E and Vitest unit tests, we added color-contrast, menu-iconography and linguistic-consistency tests. These are criteria usually eyeballed in review that decay over time; as tests, they don't." },
+      },
+      {
+        title: { es: "Estados de interfaz completos", en: "Complete UI states" },
+        description: { es: "Esqueletos de carga, acuse de acciones sin salto de layout, y pantallas de error y 404 que antes no existían. El objetivo fue que ningún estado dejara al usuario frente a una pantalla ambigua.", en: "Loading skeletons, action acknowledgements without layout shift, and error and 404 screens that previously did not exist. The goal was that no state leaves the user staring at an ambiguous screen." },
+      },
+    ],
+  },
+  {
     id: "botinfy-auth",
     title: {
       es: "Botinfy Auth",

@@ -56,6 +56,24 @@ export const STR = {
   allWork:  { es: "TODO EL TRABAJO",      en: "ALL WORK" },
   stack:    { es: "STACK PRINCIPAL",      en: "CORE STACK" },
 
+  // Home — how I build
+  howIBuild: { es: "CÓMO CONSTRUYO", en: "HOW I BUILD" },
+  pillarReliability: { es: "Fiabilidad primero", en: "Reliability first" },
+  pillarReliabilityBody: {
+    es: "Reintentos, colas de fallos persistentes, deduplicación y apagado ordenado. Un evento aceptado se entrega o queda registrado — nunca desaparece en silencio.",
+    en: "Retries, persistent failure queues, deduplication and ordered shutdown. An accepted event is either delivered or recorded — it never vanishes silently.",
+  },
+  pillarSecurity: { es: "Seguridad aplicada", en: "Applied security" },
+  pillarSecurityBody: {
+    es: "Credenciales por tenant en vez de un token compartido, firmas HMAC verificadas, sesiones endurecidas y trazas de auditoría. El aislamiento entre clientes es requisito, no detalle.",
+    en: "Per-tenant credentials instead of a shared token, verified HMAC signatures, hardened sessions and audit trails. Cross-tenant isolation is a requirement, not a detail.",
+  },
+  pillarContracts: { es: "Contratos explícitos", en: "Explicit contracts" },
+  pillarContractsBody: {
+    es: "Documento qué recibe y qué responde cada consumidor antes de escribir el handler. Si otro equipo se conecta, no debería tener que leer mi código para entenderlo.",
+    en: "I document what each consumer receives and returns before writing the handler. If another team integrates, they shouldn't have to read my code to understand it.",
+  },
+
   // /projects
   projectsH:   { es: "Proyectos", en: "Projects" },
   projectsSub: {
@@ -97,6 +115,8 @@ export const STR = {
   },
   secIntro:        { es: "PRESENTACIÓN",      en: "INTRO" },
   secStack:        { es: "STACK",              en: "STACK" },
+  secCompetencies: { es: "COMPETENCIAS",       en: "COMPETENCIES" },
+  secEngineering:  { es: "INGENIERÍA COMPLEJA", en: "COMPLEX ENGINEERING" },
   secExperience:   { es: "EXPERIENCIA",        en: "EXPERIENCE" },
   secEducation:    { es: "FORMACIÓN",          en: "EDUCATION" },
   secLanguages:    { es: "IDIOMAS",            en: "LANGUAGES" },
@@ -107,6 +127,22 @@ export const STR = {
   stackFrameworks: { es: "Frameworks",         en: "Frameworks" },
   stackDatabases:  { es: "Bases de datos",     en: "Databases" },
   stackTools:      { es: "Herramientas",       en: "Tools" },
+  stackRealtime:   { es: "Tiempo real",        en: "Real time" },
+  stackSecurity:   { es: "Seguridad",          en: "Security" },
+  stackTesting:    { es: "Testing",            en: "Testing" },
+
+  competenciesSub: {
+    es: "Cómo construyo, no solo con qué.",
+    en: "How I build, not just what with.",
+  },
+  engineeringSub: {
+    es: "Trabajo paralelo que empuja los límites del stack habitual.",
+    en: "Side work that pushes past the usual stack.",
+  },
+
+  // CV
+  cvDownload: { es: "Descargar CV", en: "Download CV" },
+  cvSection:  { es: "CURRÍCULUM",   en: "RÉSUMÉ" },
 
   hobbiesPlaceholder: {
     es: "Sección en construcción. Pronto: música, juegos, libros, lo que sea que me distrae bien.",
