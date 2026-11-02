@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
+
 type GalleryImage = {
   title: string;
   alt: string;
@@ -7,31 +9,70 @@ type GalleryImage = {
 };
 
 export function Gallery({ images }: { images: GalleryImage[] }) {
+  const t = useT();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const lastOpened = useRef<number | null>(null);
+
+  const close = useCallback(() => setSelectedIdx(null), []);
+  const prev = useCallback(() => setSelectedIdx((i) => (i === null ? i : Math.max(0, i - 1))), []);
+  const next = useCallback(
+    () => setSelectedIdx((i) => (i === null ? i : Math.min(images.length - 1, i + 1))),
+    [images.length],
+  );
+
+  const isOpen = selectedIdx !== null;
+
+  // While the lightbox is open: Esc closes, arrows navigate, the page behind
+  // doesn't scroll, and focus sits on the close button. On close, focus goes
+  // back to the thumbnail that opened it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = lastOpened.current !== null ? thumbRefs.current[lastOpened.current] : null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+    };
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    closeRef.current?.focus();
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+      opener?.focus();
+    };
+  }, [isOpen, close, prev, next]);
 
   if (images.length === 0) {
     return (
       <section className="px-6 md:px-14 py-8 border-y border-border bg-surface/50">
         <div className="text-center py-12">
-          <p className="text-text-mute">Sin imágenes disponibles por ahora.</p>
+          <p className="text-text-mute">{t({ es: "Sin imágenes disponibles por ahora.", en: "No images available yet." })}</p>
         </div>
       </section>
     );
   }
+
+  const current = selectedIdx !== null ? images[selectedIdx] : null;
 
   return (
     <>
       {/* Gallery Grid */}
       <section className="px-6 md:px-14 py-10 border-b border-border">
         <div className="font-mono text-[12px] text-text-dim tracking-[0.12em] mb-5">
-          GALERÍA
+          {t({ es: "GALERÍA", en: "GALLERY" })}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {images.map((img, idx) => (
             <button
               key={idx}
+              ref={(el) => { thumbRefs.current[idx] = el; }}
               type="button"
-              onClick={() => setSelectedIdx(idx)}
+              onClick={() => { lastOpened.current = idx; setSelectedIdx(idx); }}
+              aria-label={t({ es: `Ampliar: ${img.title}`, en: `Enlarge: ${img.title}` })}
               className="relative aspect-video bg-bg border border-border hover:border-accent transition-colors overflow-hidden group cursor-pointer"
             >
               <img
@@ -48,52 +89,64 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
         </div>
       </section>
 
-      {/* Lightbox Modal */}
-      {selectedIdx !== null && (
+      {/* Lightbox Modal — any click outside the image and the controls closes it */}
+      {current && selectedIdx !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setSelectedIdx(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.title}
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          onClick={close}
         >
-          <div className="max-w-4xl w-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={images[selectedIdx].src}
-              alt={images[selectedIdx].alt}
-              className="w-full h-full object-contain"
-            />
-            <div className="text-center mt-3 text-text-mute text-[13px]">
-              {images[selectedIdx].title}
+          {/* Top bar: always on screen, whatever the image size */}
+          <div className="flex items-center justify-between gap-4 px-4 md:px-8 py-3 shrink-0">
+            <div className="font-mono text-[12px] text-text-mute truncate">
+              <span className="text-text-dim">{selectedIdx + 1} / {images.length}</span>
+              <span className="mx-2 text-text-faint">·</span>
+              {current.title}
             </div>
-            <div className="text-center mt-2 text-text-dim text-[11px]">
-              {selectedIdx + 1} / {images.length}
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-center gap-3 mt-4">
-              <button
-                type="button"
-                onClick={() => setSelectedIdx(Math.max(0, selectedIdx - 1))}
-                disabled={selectedIdx === 0}
-                className="px-3 py-1 border border-border-hi text-text-mute disabled:opacity-50 hover:bg-surface/20 text-[12px]"
-              >
-                ← {selectedIdx > 0 ? "Anterior" : ""}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedIdx(null)}
-                className="px-3 py-1 border border-border-hi text-text-mute hover:bg-surface/20 text-[12px]"
-              >
-                Cerrar
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedIdx(Math.min(images.length - 1, selectedIdx + 1))}
-                disabled={selectedIdx === images.length - 1}
-                className="px-3 py-1 border border-border-hi text-text-mute disabled:opacity-50 hover:bg-surface/20 text-[12px]"
-              >
-                {selectedIdx < images.length - 1 ? "Siguiente" : ""} →
-              </button>
-            </div>
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={close}
+              className="shrink-0 inline-flex items-center gap-2 px-3 py-1.5 border border-border-hi bg-bg font-mono text-[12px] text-text hover:border-accent focus-visible:outline-1 focus-visible:outline-accent focus-visible:outline-offset-2"
+            >
+              ✕ {t({ es: "Cerrar", en: "Close" })}
+              <kbd className="hidden md:inline text-[10px] text-text-dim border border-border px-1">Esc</kbd>
+            </button>
           </div>
+
+          {/* Image: capped to the space left, so it never pushes the controls off screen */}
+          <div className="flex-1 min-h-0 flex items-center justify-center px-4 md:px-16">
+            <img
+              src={current.src}
+              alt={current.alt}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+
+          {/* Navigation */}
+          {images.length > 1 && (
+            <div className="flex justify-center gap-3 py-4 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); prev(); }}
+                disabled={selectedIdx === 0}
+                className="px-3 py-1.5 border border-border-hi bg-bg font-mono text-[12px] text-text-mute hover:text-text disabled:opacity-40 disabled:hover:text-text-mute"
+              >
+                ← {t({ es: "Anterior", en: "Previous" })}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); next(); }}
+                disabled={selectedIdx === images.length - 1}
+                className="px-3 py-1.5 border border-border-hi bg-bg font-mono text-[12px] text-text-mute hover:text-text disabled:opacity-40 disabled:hover:text-text-mute"
+              >
+                {t({ es: "Siguiente", en: "Next" })} →
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>
