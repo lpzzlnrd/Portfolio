@@ -49,7 +49,7 @@ export type Education = {
 
 export const ABOUT = {
   // Header / intro
-  name: "Leonardo Enrique Correa Nanez",
+  name: "Leonardo Enrique Correa Lopez",
   alias: "leoco",
   location: { es: "Valencia, Carabobo · Venezuela", en: "Valencia, Carabobo · Venezuela" },
   timezone: "UTC−4",
@@ -59,20 +59,20 @@ export const ABOUT = {
   },
 
   intro: {
-    es: "Backend / full-stack. Construyo sistemas distribuidos y multi-tenant para clientes reales en sectores regulados —salud, farmacéutico—. Trabajo sobre todo con Go, NestJS y Laravel, con modularización estricta y modelado relacional. Me gustan las APIs claras, los datos consistentes y la observabilidad por defecto: la decisión empieza por el problema, no por el stack.",
-    en: "Backend / full-stack. I build distributed, multi-tenant systems for real clients in regulated sectors —healthcare, pharmaceutical—. I mostly work with Go, NestJS and Laravel, with strict modularization and relational data modeling. I like clean APIs, consistent data and observability by default: the decision starts with the problem, not the stack.",
+    es: "Backend / full-stack. Construyo sistemas distribuidos y multi-tenant para clientes reales: salud, farmacéutico, retail, restaurantes y talleres mecánicos. Trabajo sobre todo con Go, NestJS, Laravel y Kotlin Multiplatform sobre Postgres y Supabase, con modularización estricta y modelado relacional. Me gustan las APIs claras, los datos consistentes y la observabilidad por defecto: la decisión empieza por el problema, no por el stack.",
+    en: "Backend / full-stack. I build distributed, multi-tenant systems for real clients: healthcare, pharmaceutical, retail, restaurants and auto repair shops. I mostly work with Go, NestJS, Laravel and Kotlin Multiplatform on Postgres and Supabase, with strict modularization and relational data modeling. I like clean APIs, consistent data and observability by default: the decision starts with the problem, not the stack.",
   },
 
   // Stack — grouped, real (from CV + repos)
   stack: {
-    languages: ["Go", "TypeScript", "JavaScript", "PHP", "Python", "Rust", "SQL", "Java", "C#", "C++", "Bash", "PowerShell"],
-    frameworks: ["Go (stdlib)", "NestJS 11", "Laravel 13", "FastAPI", "Axum.rs", "Next.js 16", "React 19", "Vue 3", "Angular", "Express", "TypeORM", "Eloquent"],
-    databases: ["PostgreSQL", "MySQL", "SQL Server", "Supabase", "Redis", "MongoDB", "SQLite"],
-    tools: ["Docker", "Docker Compose", "GitHub Actions", "GitLab CI/CD", "Nginx", "Tilt", "pnpm workspaces", "QEMU", "FFMPEG"],
+    languages: ["Go", "TypeScript", "JavaScript", "Kotlin", "PHP", "Python", "Rust", "SQL", "Java", "C#", "C++", "Bash", "PowerShell"],
+    frameworks: ["Go (stdlib)", "NestJS 11", "Laravel 13", "FastAPI", "Axum.rs", "Next.js 16", "React 19", "Vue 3", "Kotlin Multiplatform", "Jetpack Compose", "Angular", "Express", "TypeORM", "Drizzle ORM", "Eloquent"],
+    databases: ["PostgreSQL", "PostGIS", "MySQL", "SQL Server", "Supabase", "Redis", "MongoDB", "SQLite"],
+    tools: ["Docker", "Docker Compose", "GitHub Actions", "GitLab CI/CD", "Coolify", "PowerSync", "Nginx", "Tilt", "pnpm workspaces", "QEMU", "FFMPEG"],
     realtime: ["WebSockets", "Laravel Reverb", "Laravel Echo", "Pusher protocol", "Broadcasting"],
     security: ["JWT (jti rotation)", "Passport", "Sanctum", "bcrypt", "HMAC-SHA256", "httpOnly cookies", "Helmet", "OAuth", "RBAC", "rate limiting", "OTP"],
     testing: ["Playwright", "Vitest", "Jest", "Supertest", "PHPUnit", "white-box testing", "a11y testing"],
-    ai: ["OpenAI API", "Meta Graph API", "agentes / MCP tooling", "LLMs", "Prompt Engineering"],
+    ai: ["OpenAI API", "LangChain", "Meta Graph API", "agentes / MCP tooling", "LLMs", "Prompt Engineering"],
   },
 
   // Engineering competencies — the "how", not the "what"
@@ -127,6 +127,18 @@ export const ABOUT = {
       company: "Botinfy LLC",
       period: { es: "Dic 2025 — actualidad", en: "Dec 2025 — present" },
       bullets: [
+        {
+          es: "Backend y núcleo de datos de una app móvil offline-first para talleres mecánicos, con Kotlin Multiplatform, PowerSync y Supabase: stock y caja solo por RPC con idempotencia, aislamiento por taller verificado en CI y cada migración con tests SQL (Roda).",
+          en: "Backend and data core of an offline-first mobile app for auto repair shops, with Kotlin Multiplatform, PowerSync and Supabase: stock and cash written only through idempotent RPCs, per-shop isolation verified in CI and every migration shipped with SQL tests (Roda).",
+        },
+        {
+          es: "ERP/CRM multi-sede con NestJS, Next.js 16 y contratos Zod compartidos entre capas: matriz de permisos única y fail-closed, flujo de comandas y delivery, WhatsApp con un número por sede, y la tienda web configurada desde el ERP (Million Box).",
+          en: "Multi-branch ERP/CRM with NestJS, Next.js 16 and Zod contracts shared across layers: a single fail-closed permission matrix, an order and delivery workflow, WhatsApp with one number per branch, and a storefront configured from the ERP (Million Box).",
+        },
+        {
+          es: "Delivery con Yummy Rides y Armi detrás de una capa común de adaptadores con disyuntor y reconciliación, y un módulo de auditoría semanal por sede en producción (Picko PdV).",
+          en: "Yummy Rides and Armi delivery behind a common adapter layer with a circuit breaker and reconciliation, plus a weekly per-branch audit module in production (Picko PdV).",
+        },
         {
           es: "Gateway multi-tenant de webhooks de Meta en Go, desde cero: ruteo por cliente, firma HMAC-SHA256, deduplicación, cola de fallos persistente y aislamiento estricto entre tenants. Cero dependencias externas.",
           en: "Multi-tenant Meta webhook gateway in Go, from scratch: per-client routing, HMAC-SHA256 signing, deduplication, persistent failure queue and strict cross-tenant isolation. Zero external dependencies.",
@@ -321,7 +333,7 @@ export const ABOUT = {
 
   // Images for the gallery
   images: [
-    { title: "Leonardo Correa", alt: "Foto personal", src: "/images/about/me-1.jpg" },
+    { title: "Leonardo Lopez", alt: "Foto personal", src: "/images/about/me-1.jpg" },
     { title: "Enfoque y Desarrollo", alt: "Foto personal trabajando", src: "/images/about/me-2.jpg" },
     { title: "Personalidad e inquietud", alt: "Foto personal", src: "/images/about/me-3.jpg" },
     { title: "Plataforma Herbaplant", alt: "Vista del dashboard de trazabilidad", src: "/images/projects/herbaplant/1.png" },

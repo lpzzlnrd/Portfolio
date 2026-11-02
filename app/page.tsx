@@ -4,12 +4,14 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/primitives";
 import { ProjectCard } from "@/components/ProjectCard";
 import { PROJECTS } from "@/lib/projects";
+import { ACTIVITY } from "@/lib/activity";
 import { useT, STR } from "@/lib/i18n";
 
 export default function HomePage() {
   const t = useT();
-  const featured = PROJECTS.slice(0, 3);
-  const stack = ["Go", "TypeScript", "NestJS", "Laravel", "Next.js", "Vue", "Postgres", "Redis", "Docker"];
+  const featured = PROJECTS.filter((p) => p.featured);
+  const stack = ["Go", "TypeScript", "Kotlin", "Python", "NestJS", "Next.js", "Laravel", "Vue", "Postgres", "Supabase", "Redis", "Docker"];
+  const maxCommits = Math.max(...ACTIVITY.byProject.map((r) => r.commits));
 
   return (
     <main id="main" className="bg-bg min-h-screen">
@@ -96,6 +98,53 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* RECENT ACTIVITY */}
+      <section className="px-6 md:px-14 pt-14 pb-4">
+        <div className="flex justify-between items-baseline gap-4 mb-7 pb-3.5 border-b border-border">
+          <div className="font-mono text-[12px] tracking-[0.14em] text-text">
+            <span className="text-accent">{"// "}</span>
+            {t(STR.activity)}
+          </div>
+          <span className="font-mono text-[12px] text-text-dim text-right">{t(ACTIVITY.period)}</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {ACTIVITY.totals.map((s) => (
+            <div key={s.key} className="border border-border bg-surface p-5 flex flex-col gap-2">
+              <div className="text-[13px] text-text-mute">{t(s.label)}</div>
+              <div className="text-[36px] md:text-[44px] font-semibold leading-none tracking-[-0.02em]">{s.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 border border-border bg-surface p-5">
+          <div className="font-mono text-[11px] text-text-dim tracking-[0.12em] uppercase mb-4">
+            {t(STR.activityByProject)}
+          </div>
+          <ul className="m-0 p-0 list-none flex flex-col">
+            {ACTIVITY.byProject.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/projects/${r.id}`}
+                  title={`${r.name}: ${r.commits} commits · ${r.prs} PRs`}
+                  className="grid grid-cols-[1fr_auto] md:grid-cols-[160px_1fr_auto] items-center gap-x-4 gap-y-2 py-2.5 no-underline text-text hover:bg-surface-2 transition-colors duration-[120ms]"
+                >
+                  <span className="text-[14px]">{r.name}</span>
+                  <span className="order-last md:order-none col-span-2 md:col-span-1 h-2 bg-surface-3">
+                    <span
+                      className="block h-full bg-accent rounded-r-[4px]"
+                      style={{ width: `${(r.commits / maxCommits) * 100}%` }}
+                    />
+                  </span>
+                  <span className="font-mono text-[12px] text-text-mute text-right">
+                    {r.commits} commits · {r.prs} PRs
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="mt-3 mb-0 max-w-[720px] font-mono text-[11px] text-text-dim leading-[1.6]">{t(ACTIVITY.note)}</p>
       </section>
 
       {/* SELECTED WORK */}

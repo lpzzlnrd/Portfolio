@@ -5,7 +5,7 @@
  * summaries describe what the system does, not how much it improved.
  */
 
-export type Domain = "auth" | "fullstack" | "data" | "integrations";
+export type Domain = "auth" | "fullstack" | "data" | "integrations" | "mobile" | "ai";
 
 export type ProjectChallenge = {
   title: { es: string; en: string };
@@ -24,6 +24,7 @@ export type Project = {
   year: string;
   tags: string[];                                // 3–6 stack labels
   domain: Domain;
+  featured?: boolean;                            // shown in the home "selected work" grid
   private: boolean;                              // if true, hide github URL, show callout
   summary: { es: string; en: string };
   description?: { es: string; en: string };     // detailed description for case study
@@ -47,7 +48,8 @@ export const PROJECTS: Project[] = [
     },
     year: "2026",
     tags: ["Kotlin Multiplatform", "Jetpack Compose", "Supabase", "PostgreSQL", "PowerSync", "Next.js"],
-    domain: "fullstack",
+    domain: "mobile",
+    featured: true,
     private: true,
     summary: {
       es: "SaaS móvil para talleres mecánicos en Venezuela: recepción, órdenes, inspección digital, cotización con aprobación del cliente, inventario y caja. Funciona sin señal, con Postgres en Supabase como fuente de verdad, PowerSync para el offline y un núcleo Kotlin Multiplatform compartido.",
@@ -95,6 +97,7 @@ export const PROJECTS: Project[] = [
     year: "2026",
     tags: ["NestJS", "Next.js 16", "Supabase", "PostgreSQL RLS", "Zod", "WhatsApp Cloud API"],
     domain: "fullstack",
+    featured: true,
     private: true,
     summary: {
       es: "ERP y CRM para una tienda de flores y regalos con dos sedes: inventario, ventas, comandas de taller y delivery, finanzas y bandeja de WhatsApp con agente de IA. Incluye la tienda web, que toma catálogo, franjas, zonas y formas de pago del ERP según la sede.",
@@ -146,6 +149,7 @@ export const PROJECTS: Project[] = [
     year: "2026",
     tags: ["Go", "Meta Graph API", "Embedded Signup", "HMAC", "Docker", "GitHub Actions"],
     domain: "integrations",
+    featured: true,
     private: true,
     summary: {
       es: "Gateway multi-tenant en Go que recibe los webhooks de una App de Meta en una sola URL y los rutea al CRM de cada cliente, con firma HMAC, deduplicación y cola de fallos persistente. Cero dependencias externas.",
@@ -403,7 +407,7 @@ export const PROJECTS: Project[] = [
     },
     year: "2026",
     tags: ["Python", "FastAPI", "LangChain", "PostgreSQL", "Meta Insights API", "Google Sheets API"],
-    domain: "integrations",
+    domain: "ai",
     private: true,
     summary: {
       es: "Bot de atención con IA (FastAPI + LangChain) que cubre WhatsApp, Instagram y Facebook para un distribuidor de equipos eléctricos. Sobre el bot ya en producción construí el reporte automático de Meta Ads a Google Sheets y el reparto equitativo de chats entre vendedores.",

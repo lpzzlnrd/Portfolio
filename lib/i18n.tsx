@@ -55,6 +55,8 @@ export const STR = {
   selected: { es: "PROYECTOS DESTACADOS", en: "SELECTED WORK" },
   allWork:  { es: "TODO EL TRABAJO",      en: "ALL WORK" },
   stack:    { es: "STACK PRINCIPAL",      en: "CORE STACK" },
+  activity: { es: "ACTIVIDAD RECIENTE",   en: "RECENT ACTIVITY" },
+  activityByProject: { es: "Commits por proyecto", en: "Commits by project" },
 
   // Home — how I build
   howIBuild: { es: "CÓMO CONSTRUYO", en: "HOW I BUILD" },

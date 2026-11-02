@@ -26,6 +26,8 @@ export default function ProjectsPage() {
     { k: "fullstack",    label: t({ es: "Full-stack",      en: "Full-stack" }) },
     { k: "data",         label: "ETL & data" },
     { k: "integrations", label: t({ es: "Integraciones",   en: "Integrations" }) },
+    { k: "mobile",       label: t({ es: "Móvil",           en: "Mobile" }) },
+    { k: "ai",           label: t({ es: "IA y bots",       en: "AI & bots" }) },
   ];
 
   const normalizedQuery = query.trim().toLowerCase();
