@@ -36,6 +36,104 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
+    id: "roda",
+    title: {
+      es: "Roda · SaaS para talleres mecánicos",
+      en: "Roda · Auto repair shop SaaS",
+    },
+    role: {
+      es: "Backend, sync offline y núcleo KMP (contribuidor principal, equipo de 3)",
+      en: "Backend, offline sync and KMP core (top contributor, team of 3)",
+    },
+    year: "2026",
+    tags: ["Kotlin Multiplatform", "Jetpack Compose", "Supabase", "PostgreSQL", "PowerSync", "Next.js"],
+    domain: "fullstack",
+    private: true,
+    summary: {
+      es: "SaaS móvil para talleres mecánicos en Venezuela: recepción, órdenes, inspección digital, cotización con aprobación del cliente, inventario y caja. Funciona sin señal, con Postgres en Supabase como fuente de verdad, PowerSync para el offline y un núcleo Kotlin Multiplatform compartido.",
+      en: "Mobile SaaS for auto repair shops in Venezuela: intake, work orders, digital inspection, quotes with customer approval, inventory and cash register. It works without signal, with Postgres on Supabase as the source of truth, PowerSync for offline and a shared Kotlin Multiplatform core.",
+    },
+    description: {
+      es: "En un taller venezolano la señal se cae a mitad de una petición, los precios van en dólares con una tasa que cambia cada día, y el IGTF depende de con qué paga el cliente, no de lo que compra. Roda separa dos clases de datos. Los documentos que una persona puede reconciliar (orden, inspección, cotización, cliente) se editan sin señal y se sincronizan por Last-Write-Wins. Los contadores (stock, caja) solo los mueve el servidor. Todo monto se guarda como entero en la unidad mínima, con moneda ISO 4217 y la tasa congelada. El núcleo KMP reúne modelos, repositorios sobre watch() de PowerSync, reglas de negocio y ViewModels, y no depende de ningún framework de UI: la misma lógica puede alimentar Compose y SwiftUI, aunque hoy la app construida es la de Android. Cada taller se aísla por un taller_id firmado en el JWT, y cada migración llega con tests SQL que corren en CI contra un Postgres desechable. Un portal en Next.js le muestra al cliente las fotos de recepción con las marcas de daño y lo que encontró la inspección, y ahí mismo califica el servicio, desde un enlace con token y sin login.",
+      en: "In a Venezuelan shop the signal drops mid-request, prices are in dollars with an exchange rate that changes daily, and the IGTF tax depends on how the customer pays, not on what they buy. Roda splits data into two kinds. Documents a person can reconcile (order, inspection, quote, customer) are edited offline and synced by Last-Write-Wins. Counters (stock, cash) are moved only by the server. Every amount is stored as an integer in the minor unit, with an ISO 4217 currency and a frozen exchange rate. The KMP core holds the models, repositories built on PowerSync watch(), business rules and ViewModels, and depends on no UI framework: the same logic can feed Compose and SwiftUI, though today only the Android app is built. Each shop is isolated by a taller_id signed into the JWT, and every migration ships with SQL tests that run in CI against a throwaway Postgres. A Next.js portal shows the customer the intake photos with damage marks and what the inspection found, and lets them rate the service, through a tokenized link with no login.",
+    },
+    challenges: [
+      {
+        title: { es: "Un rechazo congela la cola de sync", en: "One rejection freezes the sync queue" },
+        description: { es: "PowerSync no resuelve conflictos y reintenta cualquier error de la subida. Una escritura que el servidor nunca aceptará —un contador colado por LWW, un salto de etapa que rechaza el gate del pipeline— se queda a la cabeza de la cola para siempre, y detrás se atasca todo lo pendiente del teléfono. Solución: el conector distingue tres casos. Lo transitorio (sin red, 5xx, token vencido) se relanza para que PowerSync reintente. Lo permanente se anota en una bitácora y se descarta, y la cola avanza. Un 23505 sobre la clave primaria de un PUT se da por subido, porque es el reintento de una escritura que llegó y cuya respuesta se perdió.", en: "PowerSync resolves no conflicts and retries any upload error. A write the server will never accept —a counter slipped through LWW, a stage jump rejected by the pipeline gate— stays at the head of the queue forever, and everything else pending on the phone piles up behind it. Solution: the connector tells three cases apart. Transient failures (no network, 5xx, expired token) are rethrown so PowerSync retries. Permanent ones are logged and discarded, and the queue moves on. A 23505 on a PUT's primary key counts as uploaded, because it is the retry of a write that landed but whose response was lost." },
+      },
+      {
+        title: { es: "RLS no ve lo que baja al teléfono", en: "RLS can't see what syncs down" },
+        description: { es: "Las policies gobiernan lo que entra por PostgREST, pero el rol de replicación de PowerSync corre con BYPASSRLS: una suite de RLS en verde no dice nada sobre la descarga. Solución: cada Sync Stream repite el predicado de su policy, el taller_id sale del JWT que firma un Custom Access Token Hook —nunca de un parámetro del cliente— y las columnas son explícitas en vez de SELECT *. Un test en CI levanta Supabase y PowerSync self-hosted con dos talleres sembrados y verifica las dos rutas: ninguna fila cruza de taller y el costo/margen no baja a roles no autorizados.", en: "Policies govern what comes in through PostgREST, but PowerSync's replication role runs with BYPASSRLS: a green RLS suite says nothing about downloads. Solution: every Sync Stream repeats its policy's predicate, the taller_id comes from the JWT signed by a Custom Access Token Hook —never from a client parameter— and columns are explicit instead of SELECT *. A CI test brings up Supabase and self-hosted PowerSync with two seeded shops and checks both paths: no row crosses shops, and cost/margin never reaches unauthorized roles." },
+      },
+      {
+        title: { es: "service_role se salta la policy del bucket", en: "service_role skips the bucket policy" },
+        description: { es: "El portal no tiene sesión: resuelve el token en el servidor con service_role, que ignora la policy de Storage que ata cada objeto a la carpeta de su taller. Las rutas de las fotos son texto que escribe la app, y nada impedía que una fila del taller A apuntara a un objeto del taller B y el portal lo firmara para quien tuviera el link. Solución: el resolver solo devuelve rutas que empiezan con el taller_id del token y sin segmentos «..»; el portal las firma en el servidor por una hora y el navegador nunca recibe la ruta cruda.", en: "The portal has no session: it resolves the token server-side with service_role, which ignores the Storage policy that ties each object to its shop's folder. Photo paths are text written by the app, and nothing stopped a row from shop A from pointing at an object of shop B, which the portal would then sign for anyone holding the link. Solution: the resolver only returns paths prefixed with the token's taller_id and free of «..» segments; the portal signs them server-side for one hour, and the browser never sees a raw path." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Stock y caja solo por RPC", en: "Stock and cash only through RPCs" },
+        description: { es: "Existencias, kardex, reservas, pagos y arqueos tienen RLS con una sola policy, la de SELECT: el usuario lee y el motor le niega escribir. La única vía de escritura son funciones security definer que filtran el tenant contra el JWT. reservar_stock bloquea la fila con FOR UPDATE para que dos asesores no reserven la última pieza, y registrar_pago exige una clave de idempotencia única por taller: la cola reintenta, y una red que se cae después del cobro no puede cobrar dos veces. Postgres calcula el IGTF en su propia columna y también el esperado del arqueo. Estas tablas no se replican al teléfono.", en: "Stock levels, ledger, reservations, payments and cash counts have RLS with only a SELECT policy: users can read, and the engine denies writes. The only write path is security definer functions that filter the tenant against the JWT. reservar_stock locks the row with FOR UPDATE so two advisors can't reserve the last part, and registrar_pago requires an idempotency key unique per shop: the queue retries, and a network drop after the charge must not charge twice. Postgres computes the IGTF in its own column, along with the expected cash count. None of these tables sync to the phone." },
+      },
+      {
+        title: { es: "LWW acotado por columna", en: "Column-scoped Last-Write-Wins" },
+        description: { es: "Un PATCH sube solo las columnas que cambiaron, así que dos técnicos que editan campos distintos de la misma orden no se pisan; los PATCH seguidos a una fila se fusionan antes de subir, porque Postgres evalúa sus CHECK en cada UPDATE. El régimen de escritura de cada tabla (documento, hecho inmutable, solo lectura o server-authoritative) se inyecta desde el mismo AppSchema que define la base local, así que una tabla nueva no puede colarse por LWW por olvido. En CI, un verificador cruza los predicados de sync_rules.yaml con los de las policies y otro, las consultas locales con el AppSchema.", en: "A PATCH uploads only the changed columns, so two technicians editing different fields of the same order don't overwrite each other; consecutive PATCHes to one row are merged before upload, because Postgres evaluates its CHECKs on every UPDATE. Each table's write regime (document, immutable fact, read-only or server-authoritative) is injected from the same AppSchema that defines the local database, so a new table can't slip through LWW by omission. In CI, one checker matches sync_rules.yaml predicates against the policies and another matches local queries against AppSchema." },
+      },
+    ],
+  },
+  {
+    id: "million-box",
+    title: {
+      es: "Million Box · ERP y tienda web",
+      en: "Million Box · ERP and storefront",
+    },
+    role: {
+      es: "Full-stack (contribuidor principal, equipo de 2)",
+      en: "Full-stack (lead contributor, team of 2)",
+    },
+    year: "2026",
+    tags: ["NestJS", "Next.js 16", "Supabase", "PostgreSQL RLS", "Zod", "WhatsApp Cloud API"],
+    domain: "fullstack",
+    private: true,
+    summary: {
+      es: "ERP y CRM para una tienda de flores y regalos con dos sedes: inventario, ventas, comandas de taller y delivery, finanzas y bandeja de WhatsApp con agente de IA. Incluye la tienda web, que toma catálogo, franjas, zonas y formas de pago del ERP según la sede.",
+      en: "ERP and CRM for a two-branch flower and gift shop: inventory, sales, workshop and delivery orders, finance, and a WhatsApp inbox with an AI agent. Includes the web storefront, which pulls catalog, time slots, zones and payment methods from the ERP per branch.",
+    },
+    description: {
+      es: "Monorepo pnpm con un backend NestJS por capas, un frontend Next.js 16 con Tailwind 4, Postgres en Supabase con RLS por sede y pgvector, y un paquete de contratos en Zod que comparten las dos capas. Cuatro roles —Gerencia, Vendedor, Florista y Delivery— entran cada uno a su pantalla. Una comanda recorre el flujo completo: el vendedor la confirma con fecha y franja, la florista la marca lista con foto de salida, Gerencia asigna el delivery y este la entrega con foto o la cierra como no entregada. WhatsApp llega por el Botinfy Gateway con un número por sede, y un agente de OpenAI responde con RAG sobre el catálogo y herramientas que consultan precio y disponibilidad en vivo. La tienda web vive en un repo aparte: guarda el pedido en la API con un código MB-XXXX, abre el WhatsApp de la sede elegida y ofrece cuenta de cliente con código por correo, historial, direcciones y repetir pedido. Se despliega en Coolify con Docker Compose.",
+      en: "pnpm monorepo with a layered NestJS backend, a Next.js 16 frontend with Tailwind 4, Supabase Postgres with per-branch RLS and pgvector, and a Zod contracts package shared by both layers. Four roles —Management, Sales, Florist and Delivery— each land on their own screen. An order runs the whole flow: sales confirms it with a date and time slot, the florist marks it ready with an exit photo, management assigns a driver, and the driver delivers it with a photo or closes it as undelivered. WhatsApp comes in through the Botinfy Gateway with one number per branch, and an OpenAI agent answers using RAG over the catalog plus tools that look up live price and availability. The storefront lives in a separate repo: it saves the order to the API with an MB-XXXX code, opens the chosen branch's WhatsApp, and offers a customer account with email-code login, history, addresses and repeat order. Deployed on Coolify with Docker Compose.",
+    },
+    challenges: [
+      {
+        title: { es: "Permisos copiados en cinco sitios", en: "Permissions copied in five places" },
+        description: { es: "Qué rol puede qué estaba repetido en RLS, los decoradores de Nest, el menú, el middleware de Next y tres listas de roles, y ya había divergido: un florista o un delivery podía leer el CRM de su sede llamando directo a Supabase. Solución: una matriz única en packages/contracts/rbac con puede(), puedeEntrar() e inicioPara(), que leen backend y frontend. El guard de Nest es fail-closed —un endpoint sin acceso declarado responde 403—, RLS queda cubierta por tests pgTAP por rol, y otros tests recorren controllers y páginas para que nada nuevo llegue a deploy sin declarar su acceso.", en: "Which role can do what was repeated across RLS, Nest decorators, the nav menu, the Next middleware and three role lists, and had already drifted: a florist or driver could read their branch's CRM by calling Supabase directly. Solution: a single matrix in packages/contracts/rbac with puede(), puedeEntrar() and inicioPara(), read by both backend and frontend. The Nest guard is fail-closed —an endpoint with no declared access returns 403—, RLS is covered by per-role pgTAP tests, and other tests walk every controller and page so nothing new ships without declaring its access." },
+      },
+      {
+        title: { es: "Dos números, un mismo cliente", en: "Two numbers, one customer" },
+        description: { es: "Cada sede tiene su número de WhatsApp en coexistencia con la app del teléfono: el mismo cliente puede escribirle a los dos, y el historial llega en bloques de cientos de hilos que no caben en los 5 segundos que espera el gateway. Solución: una tabla de líneas por phone_number_id con su sede, una conversación por contacto y por línea, y la respuesta sale del mismo número vía X-Phone-Number-Id. El historial se guarda crudo y se importa después, retomable si el proceso se cae; la marca de último mensaje solo avanza, porque el gateway no garantiza el orden.", en: "Each branch has its own WhatsApp number running in coexistence with the phone app: one customer can message both, and history arrives in blocks of hundreds of threads that don't fit in the gateway's 5-second window. Solution: a lines table keyed by phone_number_id with its branch, one conversation per contact per line, and replies go out from the same number via X-Phone-Number-Id. History is stored raw and imported afterwards, resumable if the process dies; the last-message mark only moves forward, since the gateway doesn't guarantee order." },
+      },
+      {
+        title: { es: "Asignar el delivery sin perder el rastro", en: "Assigning delivery without losing the trail" },
+        description: { es: "Cada sede tiene sus propios deliverys y quien asigna conoce las zonas, así que la asignación no podía ser automática; además hacía falta saber en qué tramo se dañan las flores. Solución: Gerencia asigna viendo a cada delivery como bloqueado, con carga o libre según su turno y la franja, en hora de Caracas. Cada transición es una función de Postgres que revalida el estado dentro de la transacción, con CHECK en la tabla, y dos fotos —salida del taller y entrega— separan la responsabilidad de florista, tienda y delivery.", en: "Each branch has its own drivers and whoever assigns knows the zones, so assignment couldn't be automatic; it also had to be clear on which leg the flowers got damaged. Solution: management assigns while seeing each driver as blocked, loaded or free based on their shift and the time slot, in Caracas time. Each transition is a Postgres function that re-validates state inside the transaction, backed by table CHECKs, and two photos —leaving the workshop and at delivery— split responsibility between florist, store and driver." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Contrato primero", en: "Contract first" },
+        description: { es: "Los schemas de Zod viven en packages/contracts: el backend valida cada payload con un ZodValidationPipe y el frontend importa los mismos schemas y tipos. Un cambio de contrato entra en su propia PR antes que la implementación, así que un campo renombrado rompe la compilación de las dos capas en vez de aparecer como bug en staging.", en: "Zod schemas live in packages/contracts: the backend validates every payload with a ZodValidationPipe and the frontend imports the same schemas and types. A contract change lands in its own PR before the implementation, so a renamed field breaks the build in both layers instead of surfacing as a bug in staging." },
+      },
+      {
+        title: { es: "La tienda la configura el ERP", en: "The ERP configures the storefront" },
+        description: { es: "La tienda lee de la API pública las sedes con sus franjas y zonas, el catálogo con caché de 60 s, las formas de pago de la sede o comunes a todas, y los productos que Gerencia oculta por sede. Al guardar, el backend comprueba sede, franja y zona y recalcula el total con los precios del ERP. En lugar de captcha hay un límite de 5 pedidos por minuto por IP y un campo trampa: si viene lleno, responde como éxito sin guardar nada.", en: "The storefront reads from the public API the branches with their slots and zones, the catalog with a 60 s cache, payment methods for that branch or shared by all, and the products management hides per branch. On save, the backend checks branch, slot and zone and recomputes the total from ERP prices. Instead of a captcha there's a 5-orders-per-minute IP limit and a honeypot field: if it comes filled, the API answers as success and stores nothing." },
+      },
+      {
+        title: { es: "Portar en vez de reescribir", en: "Port instead of rewrite" },
+        description: { es: "El cliente ya había aprobado el prototipo, así que la tienda no se reescribió: un script lo porta y le aplica parches con su motivo, que fallan en voz alta si el prototipo cambia. Un comparador saca capturas de nueve vistas en móvil y escritorio, claro y oscuro, y las compara píxel a píxel; una prueba E2E manda pedidos reales al backend y verifica código, SKU y total.", en: "The client had already approved the prototype, so the storefront wasn't rewritten: a script ports it and applies patches, each with its reason, that fail loudly if the prototype changes. A comparer captures nine views on mobile and desktop, light and dark, and diffs them pixel by pixel; an E2E test sends real orders to the backend and checks code, SKUs and total." },
+      },
+    ],
+  },
+  {
     id: "botinfy-gateway",
     title: {
       es: "Botinfy Gateway",
@@ -43,10 +141,10 @@ export const PROJECTS: Project[] = [
     },
     role: {
       es: "Backend (autor principal)",
-      en: "Backend (sole author)",
+      en: "Backend (lead author)",
     },
     year: "2026",
-    tags: ["Go", "Meta Graph API", "HMAC", "Docker", "GitHub Actions"],
+    tags: ["Go", "Meta Graph API", "Embedded Signup", "HMAC", "Docker", "GitHub Actions"],
     domain: "integrations",
     private: true,
     summary: {
@@ -88,6 +186,114 @@ export const PROJECTS: Project[] = [
         title: { es: "Operación sin reinicios", en: "Operating without restarts" },
         description: { es: "La tabla de clientes se recarga en caliente bajo un candado compartido con los cambios de la API de administración, así que dar de alta un cliente no requiere redesplegar. Se suma métricas en memoria con endpoint /stats, health check, middleware de request-ID y checks de despliegue en GitHub Actions.", en: "The client table hot-reloads under a lock shared with admin API changes, so onboarding a client requires no redeploy. On top of that: in-memory metrics with a /stats endpoint, health checks, request-ID middleware and deploy checks in GitHub Actions." },
       },
+      {
+        title: { es: "Alta de clientes en autoservicio", en: "Self-service client onboarding" },
+        description: { es: "Conectar un WhatsApp nuevo ya no pasa por el servidor: el gateway emite un link firmado, de un solo uso y con vencimiento, que abre Embedded Signup de Meta. Al cerrar el popup canjea el código —que vive 30 segundos—, suscribe la App a la WABA del cliente y lo escribe en la tabla. Soporta números en coexistencia con la app de WhatsApp Business, guarda un token por WABA en vez de usar el global y, si el cliente tiene un portafolio de Meta fijado, rechaza con 409 una WABA que pertenezca a otro.", en: "Connecting a new WhatsApp number no longer touches the server: the gateway issues a signed, single-use, expiring link that opens Meta's Embedded Signup. When the popup closes it exchanges the code —which lives 30 seconds—, subscribes the App to the client's WABA and writes the client into the table. It supports numbers in coexistence with the WhatsApp Business app, stores one token per WABA instead of using the global one and, when the client has a pinned Meta portfolio, rejects with a 409 any WABA that belongs to another." },
+      },
+      {
+        title: { es: "Tres canales de salida, cada uno con su permiso", en: "Three outbound channels, each with its own permission" },
+        description: { es: "Además de WhatsApp, cada CRM emite por Messenger e Instagram con el token de su propia página o cuenta, y administra sus plantillas de WhatsApp (listar, crear, borrar) con su API key. La comprobación de qué puede emitir cada cliente se hace por canal: como los espacios de ids de Meta son independientes, con una sola lista un cliente podría emitir desde la página de otro nombrándola como si fuera su número.", en: "Besides WhatsApp, each CRM sends through Messenger and Instagram with its own page or account token, and manages its WhatsApp templates (list, create, delete) with its API key. What each client may send from is checked per channel: since Meta's id spaces are independent, a single list would let a client send from another client's page by naming it as if it were their number." },
+      },
+    ],
+  },
+  {
+    id: "blackout-tracker",
+    title: {
+      es: "BlackoutTracker · Cortes de luz y agua",
+      en: "BlackoutTracker · Power and water outages",
+    },
+    role: {
+      es: "Backend, integración y PWA (equipo de 2)",
+      en: "Backend, integration and PWA (2-person team)",
+    },
+    year: "2026",
+    tags: ["NestJS", "PostGIS", "Drizzle ORM", "React PWA", "Supabase", "IndexedDB"],
+    domain: "fullstack",
+    private: false,
+    summary: {
+      es: "PWA comunitaria para reportar cortes de agua y luz en la urbanización Guaparo (Valencia, Venezuela). Un sector cambia de estado solo cuando varios residentes distintos coinciden dentro de una ventana de tiempo, sin administrador.",
+      en: "Community PWA for reporting water and power outages in the Guaparo neighborhood (Valencia, Venezuela). A sector changes status only when several different residents agree within a time window, with no administrator.",
+    },
+    description: {
+      es: "Proyecto de la cátedra Sistemas de Información (UJAP, 2026). Hoy los vecinos se avisan de los cortes por WhatsApp; BlackoutTracker toma esa información, la estructura y la valida. Cada residente se registra una sola vez con un pin sobre su vivienda, y la API le asigna un sector con ST_Covers contra polígonos de PostGIS: seis sectores trazados sobre calles de OpenStreetMap. Después reporta cuándo empieza y cuándo termina cada corte, también sin conexión: el reporte espera en IndexedDB y se envía con la hora real del evento. El estado del sector se decide por consenso —3 residentes, en una ventana de 30 min para luz y de 180 para agua, todo configurable— y la duración típica de un corte se estima con la mediana de los ciclos cerrados, siempre junto al número de cortes en que se basa. Es un monorepo pnpm con una API en NestJS 11 + Drizzle, una PWA en React + Vite y un paquete de tipos compartido; Supabase solo aporta Postgres/PostGIS, Auth y Realtime.",
+      en: "Built for the Information Systems course (UJAP, 2026). Today neighbors tell each other about outages on WhatsApp; BlackoutTracker takes that information, structures it and validates it. Each resident registers once with a pin on their home, and the API assigns them a sector with ST_Covers against PostGIS polygons: six sectors traced along OpenStreetMap streets. From then on they report when each outage starts and ends, offline too: the report waits in IndexedDB and is sent with the real time of the event. A sector's status is decided by consensus —3 residents within a 30-minute window for power and 180 for water, all configurable— and the typical outage length is estimated as the median of closed cycles, always shown next to the number of outages behind it. It's a pnpm monorepo with a NestJS 11 + Drizzle API, a React + Vite PWA and a shared types package; Supabase only provides Postgres/PostGIS, Auth and Realtime.",
+    },
+    challenges: [
+      {
+        title: { es: "Consenso sin árbitro", en: "Consensus without an arbiter" },
+        description: { es: "Como no hay moderador, el sistema decide solo cuándo empezó y cuándo terminó un corte, y dos reportes simultáneos del mismo sector podían abrir dos eventos. Solución: la decisión vive en funciones puras con una ventana deslizante que cuenta un voto por residente, con su marca más antigua. La hora del evento es la mediana de las N horas, así que un reloj desfasado o un vecino que avisa tarde no la mueven. Cada evaluación corre dentro de la transacción del reporte con un pg_advisory_xact_lock por (sector, servicio), y un índice único parcial permite un solo evento abierto por par.", en: "With no moderator, the system decides on its own when an outage started and when it ended, and two simultaneous reports from the same sector could open two events. Solution: the decision lives in pure functions with a sliding window that counts one vote per resident, using that resident's earliest mark. The event time is the median of the N timestamps, so a skewed clock or a neighbor who reports late doesn't shift it. Each evaluation runs inside the report's transaction under a pg_advisory_xact_lock per (sector, service), and a partial unique index allows only one open event per pair." },
+      },
+      {
+        title: { es: "Cortes que nadie cierra", en: "Outages nobody closes" },
+        description: { es: "Si nadie avisa que el servicio volvió, el evento queda abierto para siempre y el próximo corte se le suma; y si se le inventa un fin, la mediana recibe una duración que nadie observó. Solución: los reportes abiertos vencen a las 48 h. Si todos vencen sin que nadie cierre, el evento se marca incompleto con fin_en nulo (lo exige un CHECK), así sale del índice de eventos abiertos y queda fuera de la estimación sin filtros extra.", en: "If nobody reports that service came back, the event stays open forever and the next outage gets added to it; and if an end time is made up, the median gets a duration nobody observed. Solution: open reports expire after 48 h. If all of them expire with nobody closing, the event is marked incomplete with a null fin_en (enforced by a CHECK), so it leaves the open-event index and drops out of the estimate without extra filters." },
+      },
+      {
+        title: { es: "Red intermitente", en: "Flaky network" },
+        description: { es: "Con la red intermitente, un envío puede cortarse después de que la API ya guardó el reporte, y el reintento lo duplicaría. Solución: el cliente genera el UUID del reporte y la base lo usa como clave primaria. El PUT es idempotente: con el mismo contenido devuelve el mismo reporte y con otro distinto da 409. La cola de Dexie se envía en orden cronológico y se detiene en el primer fallo reintentable, y un test de integración pasa los envíos por un proxy que corta peticiones al azar para verificar que no haya pérdidas ni duplicados.", en: "On a flaky network, a request can drop after the API has already saved the report, and the retry would duplicate it. Solution: the client generates the report's UUID and the database uses it as the primary key. The PUT is idempotent: the same content returns the same report and different content gets a 409. The Dexie queue is sent in chronological order and stops at the first retryable failure, and an integration test routes requests through a proxy that drops them at random to check there are no losses and no duplicates." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Privacidad en la capa de datos", en: "Privacy enforced at the data layer" },
+        description: { es: "Ningún endpoint devuelve coordenadas de residentes, solo agregados por sector, y el mapa colorea polígonos en lugar de dibujar puntos. En Postgres, RLS está en deny-all y se aplica REVOKE a anon y authenticated en todas las tablas, salvo estado_sector, lo único que el front lee directo vía Supabase Realtime. Nest no emite tokens: verifica el JWT de Supabase con jose contra el JWKS.", en: "No endpoint returns resident coordinates, only per-sector aggregates, and the map colors polygons instead of plotting points. In Postgres, RLS is deny-all and anon and authenticated get a REVOKE on every table, except estado_sector, the only thing the front end reads directly through Supabase Realtime. Nest issues no tokens: it verifies the Supabase JWT with jose against the JWKS." },
+      },
+      {
+        title: { es: "Frontend con puertos y adaptadores", en: "Ports-and-adapters front end" },
+        description: { es: "La PWA recibe 12 puertos (reloj, conexión, sesión, cola y uno por recurso de la API) que se arman en un solo archivo. Los adaptadores reales (HTTP, Dexie, Supabase) y los mocks son intercambiables, una suite de contrato corre contra los dos y ESLint hace cumplir la frontera. Así el modo demo es un conjunto de adaptadores y no condiciones repartidas por la app, y las pruebas E2E con Playwright corren en Docker sin tocar Supabase.", en: "The PWA receives 12 ports (clock, connectivity, session, queue and one per API resource), assembled in a single file. The real adapters (HTTP, Dexie, Supabase) and the mocks are interchangeable, a contract suite runs against both and ESLint enforces the boundary. That way demo mode is a set of adapters rather than conditionals spread across the app, and the Playwright E2E tests run in Docker without touching Supabase." },
+      },
+    ],
+    github: "https://github.com/lpzzlnrd/BlackoutTracker",
+    live: "https://blackout-tracker-nine.vercel.app",
+  },
+  {
+    id: "picko-pdv",
+    title: {
+      es: "Picko PdV · Pizza de Verdad",
+      en: "Picko PdV · Pizza de Verdad",
+    },
+    role: {
+      es: "Full-stack (módulos de delivery de terceros, disciplina y cobranza)",
+      en: "Full-stack (third-party delivery, discipline and collections modules)",
+    },
+    year: "2026",
+    tags: ["Next.js", "TypeScript", "Supabase", "PostgreSQL", "Vitest", "PowerShell"],
+    domain: "fullstack",
+    private: true,
+    summary: {
+      es: "Módulos que construí sobre la plataforma de operación de una cadena de pizzerías multi-sede: delivery con Yummy Rides y Armi detrás de una capa común de adaptadores, una auditoría semanal que puntúa cada sede de 0 a 100 y el backend de cobranza por WhatsApp alimentado desde el sistema administrativo Galac.",
+      en: "Modules I built on top of the operations platform of a multi-branch pizza chain: Yummy Rides and Armi delivery behind a common adapter layer, a weekly audit that scores each branch 0–100, and a WhatsApp collections backend fed from the Galac accounting system.",
+    },
+    description: {
+      es: "Picko PdV es el fork de Picko (pedidos por WhatsApp Flows, CRM, cocina y reparto) adaptado a Pizza de Verdad, una cadena de sedes franquiciadas. La plataforma es de un equipo; mi parte fueron tres módulos. Delivery con terceros: desde «¿Quién lo lleva?» la sede pide el viaje a Yummy Rides o Armi, o Picko lo pide solo al pasar el pedido a «Listo»; los estados llegan por webhook y por una reconciliación periódica, y mueven el pedido por el mismo camino que un repartidor propio. Disciplina y Auditoría (en producción): mide cada sede por semana con datos que la plataforma ya registra (respuesta de chats, entregas, pagos, calificaciones), calcula una nota ponderada por regla y le da al auditor excepciones, multas, bitácora y un reporte en PDF. Para Alberca, la distribuidora del grupo, escribí el backend inicial de cobranza sobre su propia base Supabase: un motor que planifica avisos, cobros y recordatorios por días hábiles con feriados de Venezuela, más la ingesta de clientes y facturas desde Galac.",
+      en: "Picko PdV is the fork of Picko (WhatsApp Flows ordering, CRM, kitchen and delivery) adapted for Pizza de Verdad, a chain of franchised branches. The platform belongs to a team; my part was three modules. Third-party delivery: from «Who takes it?» a branch requests a Yummy Rides or Armi trip, or Picko requests it automatically when the order moves to «Ready»; statuses arrive by webhook and by periodic reconciliation, and move the order through the same path as an in-house rider. Discipline & Audit (in production): measures each branch weekly from data the platform already records (chat response, deliveries, payments, ratings), computes a rule-weighted score and gives the auditor exceptions, fines, an audit log and a PDF report. For Alberca, the group's distributor, I wrote the initial collections backend on its own Supabase database: an engine that schedules notices, charges and reminders on business days with Venezuelan holidays, plus customer and invoice ingestion from Galac.",
+    },
+    challenges: [
+      {
+        title: { es: "Crear un viaje no es idempotente", en: "Creating a trip is not idempotent" },
+        description: { es: "Ni Yummy ni Armi tienen idempotencia al crear, y la cuenta de cada uno es prepagada: reintentar tras un timeout puede pagar dos viajes. Solución: el servidor vuelve a cotizar, compara con el precio que vio la sede y escribe una fila «pidiendo» antes de llamar al proveedor; un índice único permite un solo viaje activo por pedido. El create nunca se reintenta: si queda sin respuesta, el webhook adopta el viaje por el id del pedido o la sede lo descarta.", en: "Neither Yummy nor Armi is idempotent on create, and each account is prepaid: retrying after a timeout can pay for two trips. Solution: the server re-quotes, checks the price the branch saw and writes a «requesting» row before calling the provider; a unique index allows one active trip per order. Create is never retried: if it goes unanswered, the webhook adopts the trip by order id or the branch discards it." },
+      },
+      {
+        title: { es: "Yummy no cancela sin conductor", en: "Yummy won't cancel without a driver" },
+        description: { es: "Si al minuto nadie tomó el viaje, la sede puede pasar el pedido a un motorizado propio, pero Yummy no deja cancelar mientras busca conductor: el que llegue después iría a buscar un pedido que ya salió. Solución: cada adaptador declara si cancela sin conductor. Armi se cancela en el acto; el viaje de Yummy queda marcado como liberado y se cancela solo en cuanto el proveedor informa un conductor.", en: "If no one takes the trip within a minute, the branch can hand the order to its own rider, but Yummy won't cancel while searching for a driver: whoever arrives later would pick up an order that already left. Solution: each adapter declares whether it can cancel without a driver. Armi cancels on the spot; the Yummy trip is marked as released and cancelled automatically as soon as the provider reports a driver." },
+      },
+      {
+        title: { es: "Una nota que se pueda defender", en: "A score that holds up" },
+        description: { es: "El auditor multa a partir de la nota, así que el número y la evidencia no pueden contradecirse. Solución: una función SQL lista cada evento que cuenta para una regla, y de esa misma lista salen la medición y los casos que ve la sede. La semana se congela el sábado para respetar el plazo de excepción, y la multa y el PDF de una semana cerrada usan los números del cierre.", en: "The auditor fines based on the score, so the number and its evidence cannot disagree. Solution: one SQL function lists every event that counts for a rule, and both the measurement and the cases the branch sees come from that same list. The week freezes on Saturday to keep the exception window, and fines and PDFs for a closed week use the frozen numbers." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Capa común con adaptadores", en: "Common layer with adapters" },
+        description: { es: "Un contrato AdaptadorProveedor (conectar, validarParaCrear, cancelaSinConductor, habilitado) aísla lo propio de cada API. La capa común hace el resto: permiso y alcance por sede, interruptor por sede, snapshot del precio en la moneda del proveedor con su tasa, bitácora idempotente de eventos que solo avanza el estado y aviso push a la sede. Así Yummy y Armi se construyeron en paralelo sin tocar lo común.", en: "An AdaptadorProveedor contract (connect, validateForCreate, cancelsWithoutDriver, enabled) isolates each API's specifics. The common layer does the rest: permission and branch scope, per-branch switch, price snapshot in the provider's currency with its rate, an idempotent event log that only moves status forward, and push alerts to the branch. That let Yummy and Armi be built in parallel without touching shared code." },
+      },
+      {
+        title: { es: "No cargar al proveedor", en: "Don't overload the provider" },
+        description: { es: "Disyuntor por tenant: tras 3 fallos seguidos corta 30 s y deja salir una sola llamada de prueba. Ningún POST se reintenta; un GET, una vez, con pausa aleatoria de 250 a 750 ms y nunca ante un timeout. La reconciliación corre cada 2 minutos como red de seguridad del webhook: una pasada a la vez, con 40 s de presupuesto y espera creciente por viaje que falla (de 2 a 30 min).", en: "Per-tenant circuit breaker: after 3 consecutive failures it opens for 30 s and lets a single probe call through. No POST is retried; a GET is retried once, with 250–750 ms random jitter and never on timeout. Reconciliation runs every 2 minutes as the webhook's safety net: one pass at a time, a 40 s budget and growing backoff per failing trip (2 to 30 min)." },
+      },
+      {
+        title: { es: "Galac sin abrir puertos", en: "Galac sync without open ports" },
+        description: { es: "Un agente en PowerShell 5.1 corre junto a la base de Galac con el Programador de tareas, lee con un usuario de solo lectura y empuja lotes por HTTPS a un endpoint con llave propia. Cada ejecución cierra un run con los totales esperados, que el panel contrasta (ok, con errores o fallida); ante un 5xx reintenta el mismo lote sin duplicar, porque la ingesta es un upsert. El motor solo cobra facturas vistas en la última sincronización buena y nace apagado: planifica, no envía.", en: "A PowerShell 5.1 agent runs next to the Galac database via Task Scheduler, reads with a read-only user and pushes batches over HTTPS to an endpoint with its own key. Each run closes with expected totals that the panel checks (ok, with errors or failed); on a 5xx it retries the same batch without duplicating, since ingestion is an upsert. The engine only bills invoices seen in the last good sync and starts switched off: it plans, it doesn't send." },
+      },
     ],
   },
   {
@@ -98,15 +304,15 @@ export const PROJECTS: Project[] = [
     },
     role: {
       es: "Full-stack (autor principal)",
-      en: "Full-stack (sole author)",
+      en: "Full-stack (lead author)",
     },
     year: "2026",
-    tags: ["Laravel", "Reverb", "Vue 3", "WebSockets", "MySQL"],
+    tags: ["Laravel", "Reverb", "Vue 3", "WebSockets", "MySQL", "Meta Graph API"],
     domain: "fullstack",
     private: false,
     summary: {
-      es: "CRM omnicanal que unifica WhatsApp, Messenger e Instagram en una bandeja única, con mensajería en vivo por WebSocket y un tablero Kanban de tickets que se mueve en tiempo real entre agentes.",
-      en: "Omnichannel CRM unifying WhatsApp, Messenger and Instagram into a single inbox, with live WebSocket messaging and a Kanban ticket board that moves in real time between agents.",
+      es: "CRM omnicanal que unifica WhatsApp, Messenger e Instagram en una bandeja única, con mensajería en vivo por WebSocket, un tablero Kanban de tickets que se mueve en tiempo real entre agentes y automatizaciones de Instagram configurables desde el propio CRM.",
+      en: "Omnichannel CRM unifying WhatsApp, Messenger and Instagram into a single inbox, with live WebSocket messaging, a Kanban ticket board that moves in real time between agents, and Instagram automations configurable from the CRM itself.",
     },
     description: {
       es: "CRM construido sobre Laravel 13 y Vue 3 que centraliza las conversaciones de los tres canales de Meta en una sola bandeja. La capa de tiempo real usa Laravel Reverb con broadcasting: los mensajes entrantes aparecen sin recargar y el tablero Kanban de tickets refleja en vivo los movimientos de cualquier agente. Incluye gestión del ciclo de vida de las cuentas de Meta, reintentos para mensajería fallida y backups automatizados de la base con verificación de integridad.",
@@ -121,6 +327,10 @@ export const PROJECTS: Project[] = [
         title: { es: "Configuración en dos lugares", en: "Configuration in two places" },
         description: { es: "Las credenciales de Meta vivían en .env, pero operación necesitaba cambiarlas sin tocar el servidor. Solución: modelo MetaAccount en base de datos con precedencia sobre .env, y un servicio que unifica ambas fuentes tras una sola interfaz.", en: "Meta credentials lived in .env, but operations needed to change them without touching the server. Solution: a MetaAccount database model taking precedence over .env, plus a service unifying both sources behind a single interface." },
       },
+      {
+        title: { es: "El bot que pisa la conversación", en: "The bot that talks over the conversation" },
+        description: { es: "Responder sola a cada DM entrante suena a mejor servicio y es lo contrario: el cliente escribe \"hola\" y recibe el menú; escribe \"quiero el de Valencia\" y recibe el menú otra vez. Solución: por defecto la automatización responde solo al primer mensaje de la conversación y se aparta en cuanto hay diálogo. Casi todo el servicio son las reglas para callarse, no el envío.", en: "Auto-replying to every incoming DM sounds like better service and is the opposite: the customer writes \"hi\" and gets the menu; writes \"I want the Valencia one\" and gets the menu again. Solution: by default the automation answers only the first message of a conversation and steps aside as soon as there is a dialogue. Most of the service is the rules for staying quiet, not the sending." },
+      },
     ],
     solutions: [
       {
@@ -130,6 +340,10 @@ export const PROJECTS: Project[] = [
       {
         title: { es: "Entrega con reintentos y respaldo", en: "Delivery with retries and backups" },
         description: { es: "Mecanismo de reintentos para mensajes fallidos, expuesto por endpoints de API y por comando de consola. En paralelo, backups automatizados de MySQL con rotación, verificación de integridad y procedimiento de restauración documentado.", en: "Retry mechanism for failed messages, exposed through API endpoints and a console command. Alongside it, automated MySQL backups with rotation, integrity verification and a documented restore procedure." },
+      },
+      {
+        title: { es: "Automatizaciones de Instagram desde el CRM", en: "Instagram automations from the CRM" },
+        description: { es: "Respuesta automática a DMs, DM más respuesta pública a quien comenta un post, Ice Breakers, Persistent Menu y menús de Quick Replies, todo editable desde la configuración del CRM y cubierto por tests de feature. La respuesta a comentarios es idempotente: el comment_id se reserva en un índice único antes de decidir nada, porque Meta reintenta el webhook y dos entregas del mismo comentario llegan en paralelo. El aviso público sale primero, para que quede dicho que la cuenta responde aunque el DM se frene por los límites de Meta.", en: "DM auto-replies, a DM plus a public reply to whoever comments on a post, Ice Breakers, Persistent Menu and Quick Reply menus, all editable from the CRM settings and covered by feature tests. Comment replies are idempotent: the comment_id is reserved in a unique index before any decision, because Meta retries the webhook and two deliveries of the same comment arrive in parallel. The public reply goes out first, so the account is seen to answer even if the DM is held back by Meta's limits." },
       },
     ],
     github: "https://github.com/lpzzlnrd/Reino-Aromas",
@@ -174,6 +388,57 @@ export const PROJECTS: Project[] = [
       {
         title: { es: "Estados de interfaz completos", en: "Complete UI states" },
         description: { es: "Esqueletos de carga, acuse de acciones sin salto de layout, y pantallas de error y 404 que antes no existían. El objetivo fue que ningún estado dejara al usuario frente a una pantalla ambigua.", en: "Loading skeletons, action acknowledgements without layout shift, and error and 404 screens that previously did not exist. The goal was that no state leaves the user staring at an ambiguous screen." },
+      },
+    ],
+  },
+  {
+    id: "novax-bot",
+    title: {
+      es: "Novax · Bot de ventas con IA",
+      en: "Novax · AI sales bot",
+    },
+    role: {
+      es: "Backend (colaborador: reportes de Meta Ads y reparto de chats)",
+      en: "Backend (contributor: Meta Ads reporting and chat distribution)",
+    },
+    year: "2026",
+    tags: ["Python", "FastAPI", "LangChain", "PostgreSQL", "Meta Insights API", "Google Sheets API"],
+    domain: "integrations",
+    private: true,
+    summary: {
+      es: "Bot de atención con IA (FastAPI + LangChain) que cubre WhatsApp, Instagram y Facebook para un distribuidor de equipos eléctricos. Sobre el bot ya en producción construí el reporte automático de Meta Ads a Google Sheets y el reparto equitativo de chats entre vendedores.",
+      en: "AI customer-service bot (FastAPI + LangChain) covering WhatsApp, Instagram and Facebook for an electrical equipment distributor. On top of the bot already in production I built the automated Meta Ads report to Google Sheets and the even distribution of chats across sales reps.",
+    },
+    description: {
+      es: "Bot de Inversiones Novax portado de n8n a Python por otro integrante del equipo: atiende por uChat, junta los mensajes en un buffer de Redis, consulta el catálogo en pgvector y, en WhatsApp, responde fuera del horario de los asesores. Mi trabajo fue sobre ese bot en producción. Porté a código el reporte de conversaciones por anuncio que vivía en n8n y lo extendí con una pestaña por mes de campañas y una comparativa semanal. Construí el reparto de chats entre asesores para que cada vendedor tenga una meta diaria medible, y una herramienta para limpiar la bandeja de uChat sin agotar el cupo de API que comparte con el bot. También mantuve los prompts del agente y el formato de las fichas de producto.",
+      en: "Inversiones Novax's bot, ported from n8n to Python by another team member: it serves customers through uChat, batches messages in a Redis buffer, queries the catalog in pgvector and, on WhatsApp, answers outside the sales reps' hours. My work was on that production bot. I ported the per-ad conversation report that lived in n8n to code and extended it with a monthly campaigns tab and a week-over-week comparison. I built the chat distribution across sales reps so each one has a measurable daily goal, and a tool to clean up the uChat inbox without exhausting the API quota it shares with the bot. I also maintained the agent's prompts and the product sheet formatting.",
+    },
+    challenges: [
+      {
+        title: { es: "La Sheet mezclaba semanas", en: "The Sheet mixed up weeks" },
+        description: { es: "El flujo de n8n actualizaba solo la columna de hoy por anuncio y nunca limpiaba: el martes seguía mostrando los números del martes anterior. Además la atribución de Meta es de 7 días, así que los días pasados siguen cambiando, y la última corrida del día perdía la última hora. Solución: cada corrida reescribe las pestañas enteras y pide todos los días de la ventana; la pestaña del mes que cerró se sigue reescribiendo hasta el día 7 y después queda fija.", en: "The n8n flow only updated today's column per ad and never cleaned up: on Tuesday it still showed last Tuesday's numbers. On top of that Meta's attribution window is 7 days, so past days keep changing, and the day's last run missed the final hour. Solution: every run rewrites the tabs entirely and requests every day in the window; the tab for the month that just closed keeps being rewritten until day 7 and then stays fixed." },
+      },
+      {
+        title: { es: "Campañas que siempre daban cero", en: "Campaigns that always read zero" },
+        description: { es: "Las campañas de interacción en publicaciones, como un concurso, no abren conversaciones, así que con la métrica de mensajes salían siempre en 0. Solución: detectarlas por los datos —objetivo de interacción y ninguna conversación iniciada registrada— y contarles interacciones con la publicación en su lugar, marcadas con un sufijo para que no se confundan con conversaciones.", en: "Post-engagement campaigns, such as a giveaway, don't open conversations, so under the messaging metric they always read 0. Solution: detect them from the data —engagement objective and no started conversation ever recorded— and count post interactions for them instead, tagged with a suffix so they aren't mistaken for conversations." },
+      },
+      {
+        title: { es: "Dos chats a la vez, el mismo asesor", en: "Two chats at once, same rep" },
+        description: { es: "Sin coordinación, dos chats que entran en el mismo instante leen el mismo conteo y caen en el mismo asesor, y tres mensajes seguidos de un cliente —tres webhooks— lo asignarían tres veces. Solución: la elección corre dentro de una transacción con pg_advisory_xact_lock, con una clave de texto para no chocar con los otros bots que comparten el mismo Supabase.", en: "Without coordination, two chats arriving at the same instant read the same count and land on the same rep, and three messages in a row from one customer —three webhooks— would assign them three times. Solution: the choice runs inside a transaction under pg_advisory_xact_lock, with a text key so it doesn't collide with the other bots sharing the same Supabase." },
+      },
+    ],
+    solutions: [
+      {
+        title: { es: "Reparto que sobrevive a un redeploy", en: "Distribution that survives a redeploy" },
+        description: { es: "La regla es el asesor que menos chats recibió hoy, desempatando por orden de la lista, en vez de un round robin con puntero que se pierde en cada redeploy. Se reparten chats, no mensajes; un cliente que vuelve dentro de la ventana sigue con el mismo asesor, y un chat que ya tiene asesor en uChat se respeta. Para no consultar uChat en cada mensaje, primero se mira la tabla propia.", en: "The rule is the rep who received the fewest chats today, ties broken by list order, instead of a pointer-based round robin that is lost on every redeploy. Chats are distributed, not messages; a customer returning within the window keeps the same rep, and a chat already assigned in uChat is respected. To avoid calling uChat on every message, the bot's own table is checked first." },
+      },
+      {
+        title: { es: "Limpieza segura por defecto", en: "Safe-by-default cleanup" },
+        description: { es: "El script de limpieza de bandeja no cambia nada por defecto: lista los candidatos en un CSV para que el cliente lo apruebe y solo cierra con --aplicar. No cierra chats cuyo último mensaje es del cliente, y respeta el cupo de 1000 pedidos por hora que comparte con el bot con una pausa entre cierres y un tope por corrida.", en: "The inbox cleanup script changes nothing by default: it lists candidates in a CSV for the client to approve and only closes with --aplicar. It never closes chats whose last message came from the customer, and it respects the 1000-requests-per-hour quota it shares with the bot with a pause between closes and a per-run cap." },
+      },
+      {
+        title: { es: "Un cron que no tumba el servicio", en: "A cron that can't take the service down" },
+        description: { es: "El reporte corre en un loop que nunca propaga errores: falla, registra y reintenta con backoff exponencial de 5 a 60 minutos. Tiene un piso de 10 minutos entre corridas para no agotar el rate limit del token de Meta, y expone su último éxito y error en /admin/estado, porque un token vencido congelaría la Sheet sin aviso.", en: "The report runs in a loop that never propagates errors: it fails, logs and retries with exponential backoff from 5 to 60 minutes. It has a 10-minute floor between runs so it can't exhaust the Meta token's rate limit, and exposes its last success and error on /admin/estado, because an expired token would freeze the Sheet silently." },
       },
     ],
   },
